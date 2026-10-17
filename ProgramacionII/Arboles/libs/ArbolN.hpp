@@ -42,6 +42,7 @@ class ArbolN{
         list<Element> inOrden();                                                // O(n), recorrido en inorden
         list<Element> postOrden();                                              // O(n), recorrido en postorden
         void imprimirArbol();                                                   // O(n), visualizacion del arbol para depurar
+        void llenarPadresHijos(list<Element> padres, list<Element> hijos);      // O(nlogn), llenado desde una columna (lista) de padres y una de hijos
         void vaciar();                                                          // O(n), llama a destruirNodo para limpiar el arbol
 };
 
@@ -201,7 +202,6 @@ ArbolN<Element>& ArbolN<Element>::operator=(const ArbolN<Element>& target){
     return *this;
 }
 
-// Correcciones 1 y 2: Limpia con vaciar() al inicio y salta cualquier hijo nulo en la lista
 template <class Element>
 void ArbolN<Element>::construir(Element e,list<ArbolN<Element> > hijos){
     vaciar();
@@ -361,6 +361,57 @@ void ArbolN<Element>::imprimirArbol(){
     while(hijo != NULL){
         imprimirArbolAux(hijo,"",hijo->getHermanoDer() == NULL);
         hijo = hijo->getHermanoDer();
+    }
+}
+
+template <class Element>
+void ArbolN<Element>::llenarPadresHijos(list<Element> padres, list<Element> hijos){
+    vaciar();
+    
+    // Si la entrada viene completamente vacía
+    if(padres.empty() && hijos.empty()){
+        return;
+    }
+
+    // Si solo hay una relación o el primer padre es único y no tiene hijos en la lista
+    Element datoRaiz = padres.front();
+    raiz = new NodoN<Element>(datoRaiz, NULL, NULL);
+    peso = 1;
+
+    if(hijos.empty()){
+        return; // Caso de un árbol de 1 solo nodo (solo raíz)
+    }
+
+    map<Element, NodoN<Element>* > nodos;
+    map<Element, NodoN<Element>* > ultimoHijo;
+
+    nodos[datoRaiz] = raiz;
+
+    while(!padres.empty() && !hijos.empty()){
+        Element p = padres.front();
+        Element h = hijos.front();
+        padres.pop_front();
+        hijos.pop_front();
+
+        if(nodos[p] == NULL){
+            nodos[p] = new NodoN<Element>(p, NULL, NULL);
+            peso++;
+        }
+        if(nodos[h] == NULL){
+            nodos[h] = new NodoN<Element>(h, NULL, NULL);
+            peso++;
+        }
+
+        NodoN<Element>* nodoPadre = nodos[p];
+        NodoN<Element>* nodoHijo = nodos[h];
+
+        if(nodoPadre->getHijoIzq() == NULL){
+            nodoPadre->setHijoIzq(nodoHijo);
+        }
+        else{
+            ultimoHijo[p]->setHermanoDer(nodoHijo);
+        }
+        ultimoHijo[p] = nodoHijo;
     }
 }
 
