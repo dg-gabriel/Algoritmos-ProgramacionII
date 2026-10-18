@@ -1,0 +1,77 @@
+Class Nodo<Element>
+    attributes
+        private:
+            element: info
+            pointer to nodo<Element>: prox
+        
+    methods
+        public:
+            proc construir(Element: info,pointer to nodo<Element>: prox)
+            func getInfo(): element
+            func getProx(): pointer to nodo<element>
+            proc setInfo(element: inf)
+            proc setProx(pointer to nodo<element>: prox)
+endclass
+
+Class Lista<Element>
+    attributes
+        private:
+            int: length
+            pointer to nodo<element>: firstmlast
+    methods:
+        public:
+            proc construir() // O(1)
+            proc construir(ref: lista<element>: target) // O(n)
+            func getLenght(): int
+            proc insertar(Element: elem,int: pos) // O(1) si pos = 1, O(n) resto de casos
+            proc eliminar(int: pos)
+            proc vaciar() // O(n)
+            func existeElemento(Element: elem): bool // O(n)
+            func concatenar(Lista<element>:L2): Lista<Element> //O(n+m)
+            func consultarPos(int: pos): element // O(1) si pos = 1,pos = n, O(n) resto de casos
+            proc modificar(int: pos,Element: elem) // O(1) si pos = 1,pos = n, O(n) resto de casos
+            proc invertir() // O(n)
+            func buscarElemento(Elemento: elem): int //O(n)
+            func esVacia(): bool //O(n)
+            func copia():Lista<Element 
+            proc eliminarElemento(Element: elem) // O(n)
+            proc destruir() //O(n)
+endClass 
+
+Class Cola<Element>
+    attributes
+        private:
+            pointer to nodo<Element>: head,tail
+            int :length
+    methods
+        public:
+            proc construir()
+            proc construir(Cola<Element>: target) //O(n)
+            func getHead(): Element //O(n)
+            func getTail(): Element //O(n)
+            proc encolar(Element: elem) //O(n)
+            func esVacia(): bool // O(1)
+            proc vaciar() //O(n)
+            func getLength(): int
+            func copiar(): Cola<Element>
+            proc destruir() //O(n)
+endClass
+
+Class Pila<Element>
+    attributes 
+        private:
+            pointer to nodo<Element>: top,bottom
+            int: length
+    methods
+        public:
+            proc construir()
+            proc construir(ref: pila<element>: target) //O(n)
+            func getTop(): element
+            func getBottom(): element
+            proc apilar(Element: elem) //O(1)
+            proc desapilar() //O(1)
+            func copiar():Pila<Element> //O(n)
+            func esVacia(): bool //O(n)
+            proc vaciar() //O(n)
+            proc destruir() //O(n)
+endClass

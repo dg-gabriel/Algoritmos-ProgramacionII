@@ -1,0 +1,45 @@
+func ArbolBin<int>::isSubTree(ArbolBin<int>: subArbol): bool
+var
+    PointerToNodoBin<int>: ptrMain
+begin
+    if subArbol.raiz then
+        ptrMain <- instance.buscarSubRaiz(instance.raiz,subArbol.raiz^.getInfo())
+        if ptrMain then
+            return instance.isSubTree(ptrMain,subArbol.raiz)
+        endif
+        return false
+    else
+        return false
+    endif
+endfunc
+
+func ArbolBin<int>:buscarSubRaiz(PointerToNodoBin<int>: main,int: target): PointerToNodoBin<int>
+var
+    PointerToNodoBin<int>: ptrReturn
+begin
+    if main then
+        if main^.getInfo() = target then
+            return main
+        else
+            ptrReturn <- instance.buscarSubRaiz(main^.getHijoIzq(),target)
+            if !ptrReturn then
+                ptrReturn <- instance.buscarSubRaiz(main^.getHijoDer(),target)
+            endif
+            return ptrReturn
+        endif
+    else
+        return NULL
+    endif
+endfunc
+func ArbolBin<int>::isSubTree(PointerToNodoBin<int>: main,sub): bool
+var
+begin
+    if (!main ^ sub) OR (main^.getInfo() != sub^.getInfo())then
+        return false
+    endif
+    if !sub then
+        return true
+    else
+        return instance.isSubTree(main^.getHijoIzq(),sub^.gethijoizq()) ^ instance.isSubTree(main^.getHijoDer(),sub^.getHijoDer())
+    endif
+endfunc

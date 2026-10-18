@@ -1,0 +1,57 @@
+func pilasYcopas(Pila<int> a, Pila<int> b, int maxSuma): int
+var
+    int acum,movMayor,movMenor
+    Pila<int>: backupA,backupB
+begin
+    backupA.construir()
+    backupB.construir()
+    bacukpA <- a.copia()
+    backupB <- b.copia()
+    while(acum < maxSuma)do
+        if(a.tope() >= b.tope())then
+            if(acum + a.tope() <= maxSuma)then
+                acum <- acum + a.tope()
+                a.desapilar()
+                movMayor <- movMayor + 1
+            else
+                break
+            endif
+        else
+            if(acum + b.tope() <= maxSuma)then
+                acum <- acum + b.tope()
+                b.desapilar()
+                movMayor <- movMayor + 1
+            else
+                break
+            endif
+        endif
+    endwhile
+    a <- backupA.copia()
+    b <- backupB.copia()
+    acum <- 0
+    while(acum < maxSuma)do
+        if(a.tope() <= b.tope())then
+            if(acum + a.tope() <= maxSuma)then
+                acum <- acum + a.tope()
+                a.desapilar()
+                movMenor <- movMenor + 1
+            else
+                break
+            endif
+        else
+            if(acum + b.tope() <= maxSuma)then
+                acum <- acum + b.tope()
+                b.desapilar()
+                movMenor <- movMenor + 1
+            else
+                break
+            endif
+        endif
+    endwhile
+    // 1 si la mejor opcion es ir por el mayor, 0 si es ir por el menor
+    if(movMenor > movMayor)then
+        return 0
+    endif
+    return 1
+endfunc
+

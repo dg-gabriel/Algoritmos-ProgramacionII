@@ -1,0 +1,100 @@
+func ArbolBin<Element>::copiarNodos(PointerToNodoBin<Element>: ptrNodo): PointerToNodoBin<Element> 
+var 
+    PointerToNodoBin<Element>: nuevo
+begin
+    if(!ptrNodo)then
+        return NULL
+    else 
+        nuevo new NodoBin<Element>(ptrNodo^.getInfo(),copiarNodos(ptrNodo^.getHijoIzq()),copiarNodos(ptrNodo^.getHijoDer()))
+        return nuevo
+    endif
+endfunc
+
+proc ArbolBin<Element>::destruirNodos(ref: PointerToNodoBin<Element> ptrNodo)
+begin
+    if(!ptrNodo)then
+        return
+    endif
+    if(!ptrNodo^.getHijoIzq() && !ptrNodo().getHijoDer)then
+        free(ptrNodo)
+        ptrNodo <- NULL
+    else
+        destruirNodos(ptrNodo^.getHijoIzq())
+        destruirNodos(ptrNodo^.getHijoDer())
+        free(ptrNodo)
+        ptrNodo <- NULL
+    endif
+endproc
+
+Definir: ¿qué debe devolver la función?
+Descomponer: ¿qué información puedo obtener de cada hijo?
+Combinar: ¿cómo utilizo esa información para resolver el problema del nodo actual?
+Probar: ¿qué devuelve la función en un árbol vacío, una hoja y un árbol con varios niveles?
+Codificar: solo cuando la lógica esté clara, escribimos el pseudocódigo.
+
+
+func ArbolBin<Element>::levelOrderTraversal(): Lista<Lista<Element>
+var
+    Cola<PointerToNodoBin<Element>>: aux
+    Lista<Lista<Element>>: result
+    Lista<Element>: sublist
+    int: len,i
+begin
+    result.construir()
+    if(instance.esNulo())then
+        return result
+    endif
+    aux.encolar(instance.raiz)
+    while(!aux.esVacia())do
+        sublist.construir()
+        len <- aux.getLength()
+        for i <- 1 to len do
+            if(aux.getHead()^.getHijoIzq())then
+                aux.encolar(aux.getHead()^.getHijoIzq())
+            endif
+            if(aux.getHead()^.getHijoDer())then
+                aux.encolar(aux.getHead^.getHijoDer())
+            endif
+            sublist.insertar(aux.getHead()^.getInfo())
+            aux.desencolar()
+        endfor
+        result.insertar(sublist,result.getLength()+1)
+    endwhile
+    return result
+endfunc
+
+func ArbolN<Element>::getHeight(): int
+    if(instance.esNulo())then
+        return 0
+    else
+        return getHeight(instance.raiz,1)
+    endif
+endfunc
+
+func ArbolN<int>::getHeight(PointerToNodoN<Element>: ptr,ref: int max): int
+var
+    PointertoNodoN<Element>: hijo
+    int: height
+begin
+    height <- 0
+    if(!ptr)then
+        return -1
+    else
+        hijo <- ptr^.getHijoIzq()
+        while(hijo)do
+            height <- height + 1 + getHeight(hijo,max)
+            if(height > max)then
+                max <- height
+            ndif
+            hijo <- hijo^.getHermanoDer()
+        endwhile
+    endif
+    return height 
+
+
+
+
+
+func ArbolBinario<int>::getMinDepth(): int
+
+

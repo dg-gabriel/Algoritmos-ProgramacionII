@@ -1,0 +1,39 @@
+func ArbolBin<int>::esAVL(): bool
+var
+    boo: result
+begin
+    result <- esAVL(instance.raiz)
+    retunr result
+endfunc
+
+func ArbolBin<int>::esAVL(PointerToNodoBin<int>: ptr): bool
+var
+    int: A1,A2
+begin
+    if(!ptr)then
+        return true
+    else
+        A1 <- getHeight(ptr^.getHijoIzq())
+        A2 <- getHeight(ptr^.getHijoDer())
+        if(abs(A1-A2) > 1)then
+            return false
+        endif
+        return esAVL(ptr^.getHijoIzq()) ^ esAvl(ptr^.getHijoDer())
+    endif
+endfunc
+
+func getHeight(PointerToNodoBin<int>: ptr): int
+var
+    int: altIzq,altDer
+begin
+    if(!ptr)then
+        return -1
+    else
+        altIzq <- 1 + getHeight(ptr^.getHijoIzq())
+        altDer <- 1 + getHeight(ptr^.getHijoDer())
+        return max(altIzq,altDer)
+    endif
+endfunc
+
+// LCA en N-ario
+func getNonnaONonno(ArbolN<Persona>: a, Persona: persona1,persona2): Persona

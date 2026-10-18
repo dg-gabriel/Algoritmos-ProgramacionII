@@ -1,0 +1,44 @@
+func camino(ArbolBin<int>: arbol,int n,m): int
+var
+
+begin
+    if(arbol.esNulo)then
+        return 0
+    endif
+    if(arbol.getHijoIzq().findValue(n) && arbol.getHijoIzq().findValue(m))then
+        return camino(arbol.getHijoIzq(),n,m)
+    endif
+    if(arbol.getHijoDer().findValue(n) && arbol.getHijoDer().findValue(m))then
+        return camino(arbol.getHijoDer,n,m)
+    endif
+    return profundidad(arbol,n) + profundidad(arbol,m)
+endfunc
+
+func profundidad(ArbolBin<int>: raiz,int: elem,int: depth): int
+var
+    int leftPath,rightPath
+begin
+    if(raiz.esNulo())then
+        return -1
+    else
+        if(raiz.getRaiz() = elem)then
+            return depth
+        endif
+        leftPath <- profundidad(raiz.getHijoIzq(),elem,depth+1)
+        rightPath <- profundidad(raiz.getHijoDer(),elem,depth+1)
+    endif
+    return max(leftPath,rightPath)
+endfunc
+    
+// copiado directamente de la guia
+func ArbolBin<int>::findValue(int: valor): bool
+begin
+    if(esNulo())then
+        return false
+    endif
+    if(raiz.getInfo() = valor)then
+        return true
+    else
+        return getHijoIzq().findValue(valor) || getHijoDer().findValue(valor)
+    endif
+endfunc

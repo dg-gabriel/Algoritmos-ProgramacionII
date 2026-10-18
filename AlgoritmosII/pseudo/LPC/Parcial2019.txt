@@ -1,0 +1,82 @@
+func sortedMerge(Lista<int> B): Lista<int>
+var
+    Lista<int> result
+    pointer to nodo: ptrA,ptrB,ptrC,aux
+begin
+    result.construir()
+    aux.construir()
+    ptrA <- this.first
+    ptrB <- B.first
+    ptrC <- aux
+    while(ptrA != NULL && ptrB != NULL)do
+        if(^ptraA.info <= ^ptrB.info)then
+            ptrC.prox <- ptrA
+            ptrC <- ptrC.prox
+            ptrA <- ptrA.prox
+        else
+            ptrC.prox <- ptrB
+            ptrC <- ptrC.prox
+            ptrB <- ptrB.prox
+        endif
+    endwhile
+    if(ptrA != NULL)then
+        ptrC.prox <- this.first
+    else if(ptrB != NULL)then
+            ptrC.prox <- B.first
+        endif
+    endif
+    result.first <- aux.prox
+    free(aux)
+    return result
+endfunc
+
+func esEquilibrada(Lista<char> expresion): bool
+var
+    Pila<char>: pilaAux
+    int: i
+    char: c
+begin
+    while(!expresion.esVacia())do
+        c <- expresion.consultarPos(1)
+        expresion.eliminar(1)
+
+        if(c == '{' || c == '[' || c == '(')then
+            pilaAux.apilar(c)
+        endif
+        if(c == '}' || c == ']' || c == ')')then
+            if(pilaAux.esVacia())then
+                return false
+            endif
+            if(validarOpuesto(c,pilaAux.tope()))then
+                pilaAux.desapilar()
+            else
+                return false
+            endif
+        endif
+    endwhile
+    if(pilaAux.esVacia())then
+        return true
+    endif
+    return false
+endfunc
+
+func mediaMovil(Lista<int> list,int m): Lista<float>
+var
+    Lista<float>: media
+    int: i,j
+    float: prom,num
+begin
+    media.construir()
+    i <- 1
+    while(i + m - 1 <= list.getLength)
+        prom <- 0.00
+        for j <- i to m+i - 1 do
+            num <- list.consultarPos(j)
+            prom <- num + prom
+        endfor
+        prom <- prom / m 
+        media.insertar(prom,media.getLength+1)
+        i <- i + 1
+    endwhile
+    return media
+endfunc

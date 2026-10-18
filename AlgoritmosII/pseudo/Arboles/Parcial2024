@@ -1,0 +1,28 @@
+func ArbolN<int>::sumaInterna(): int
+var
+    int: suma,len
+    PointerToNodoN<int>: hijo
+    Cola<PointerToNodoN<int>>: aux
+begin
+    suma <- 0
+    if(instance.esNulo())then
+        return suma
+    endif
+    aux.construir()
+    aux.encolar(instance.raiz)
+    while(!aux.esVacia())do
+        len <- aux.getLength
+        for i <- to len do
+            hijo <- aux.getHead()^.getHijoIzq()
+            if(i != 1 && i != len)then
+                suma <- suma + aux.getHead()^.getInfo()
+            endif
+            while(hijo)do
+                aux.encolar(hijo)
+                hijo <- hijo^.getHermanoDer()
+            endwhile
+            aux.desencolar()
+        endfor
+    endwhile
+    return suma
+endfunc

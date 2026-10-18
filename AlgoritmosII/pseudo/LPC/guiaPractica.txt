@@ -1,0 +1,75 @@
+Ej1. Codificar un mensaje
+proc codificar(ref:Lista<char> list)
+var 
+    int: izq,der
+    char a,b
+begin
+    if(list.getLength() < 2)then
+        return
+    endif
+    izq <- 2
+    der <- list.getLength()
+    if(der mod 2 != 0)then
+        der <- der-1
+    endif
+    while(izq < der)do
+        a <- list.consultar(izq)
+        b <- list.consultar(der)
+        list.modificar(a,der)
+        list.modificar(b,izq)
+        izq <- izq+2
+        der <- der-2
+    endwhile
+endproc
+
+Ej2. Numero de la suerte
+
+proc numerosuerte(ref: Cola<int> numeros,int m)
+var
+    int n,i
+    Cola<int> aux 
+begin
+    aux.construir()
+    n <- 2
+    i <- 1
+    while(n <= m)do
+        while(!numeros.esVacia())do
+            if(i = n)then
+                numeros.desencolar()
+                i <- 1
+            else
+                aux.encolar(numeros.frente())
+                i <- i + 1
+            endif
+        endwhile
+        numeros <- aux.copiar()
+        aux.vaciar()
+        i <- 1
+        n <- n + 1
+    endwhile
+    aux.destruir()
+endproc
+
+Ej.3 Planillas
+
+func planillas(ref: array[1...26] of Cola<Planilla>, Cola<Planilla> taquilla)
+var
+    array[1...26] of Cola<Planilla: clientes
+    Planilla persona
+    string: name
+    int: i,j
+begin
+    for j <- 1 to 26 do
+        clientes[j].construir
+    endfor
+    aux.construir()
+    persona.construir()
+    while(!taquilla.esVacia())do
+        persona <- taquilla.frente()
+        name <- persona.getApellido()
+        i <- name[1] - 64
+        clientes[i].encolar(persona)
+        taquilla.desencolar()
+    endwhile
+endfunc
+

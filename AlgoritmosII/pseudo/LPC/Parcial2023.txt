@@ -1,0 +1,29 @@
+proc reorderOddsAndEvens()
+var
+    pointer to nodo act,imparFirst,imparLast,parFirst,parLast
+    pointer to nodo dummyPar,dummyImpar
+begin
+    if(this.first = NULL)then
+        return
+    endif
+    dummyPar.new(nodo)
+    dummyImpar.new(nodo)
+    imparLast <- dummyImpar
+    parLast <- dummyPar
+    act <- this.first
+    while(act != NULL)do
+        if(act.info mod 2 = 0)then
+            parLast.prox <- act
+            parLast <- parLast.prox
+        else
+            imparLast.prox <- act
+            imparLast <-imparLast.prox
+        endif
+        act <- act.prox
+    endwhile
+    parLast.prox <- NULL
+    imparLast.prox <- dummyPar.prox
+    this.first <- dummyImpar.prox
+    free(dummyPar)
+    free(dummyImpar)
+endproc

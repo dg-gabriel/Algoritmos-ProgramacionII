@@ -1,0 +1,570 @@
+func ArbolBin<Element>::getMaxDepth()> int
+var
+    int: caminoIzq,caminoDer
+begin
+    if(!instance.getHijoIzq() && !instance.getHijoDer)then
+        return 1
+    else 
+        if(instance.getHijoIzq())then
+            caminoIzq = 1 + instance.getHijoIzq().getMaxDepth()
+        endif
+        if(instance.getHijoDer())then 
+            caminoDer = 1 + instance.getHijoDer().getMaxDepth()
+        endif
+    endif
+    return max(caminoIzq,caminoDer)
+endfunc
+
+// falto cubrir caso de arbol nulo
+// gethijoizq y der devuelven arboles no punteros, se evaluan con 
+// getHijoIzq().esNulo()
+// falto inicializar caminoizq y caminoder en 0 (ya sabia que esto estba mal)
+
+func ArbolBin<Element>::isSameTree(ArbolBin<Element>:: otro): bool
+begin   
+    if(instance.esNulo() || otro.esNulo())then
+        return instance.esNulo() && otro.esNulo()
+    endif 
+    if(instance.getInfo() != otro.getInfo())then
+        return false
+    else
+        return instance.getHijoIzq().isSameTree(otro.getHijoIzq()) && instance.getHijoDer().isSameTree(otro.getHijoDer())
+    endif
+endfunc
+
+//no habia que inicializar variables de izq y der 
+// los condicionales larguisimos eran innecesarios ambos
+// para evaluar si existe hijo es if(!instance.getHijoIzq().esNulo())
+// tampoco hacia falta proteger cada llamada con condicional, bastaba solo con retornar ambas llamadas con un AND
+
+
+func ArbolN<Element>::countNodes(): int
+var 
+    Lista<ArbolN<Element>>: hijos 
+    int: long,acum
+begin   
+    if(instance.esNulo())then
+        return 0
+    else 
+        hijos.construir()
+        hijos <- getHijos()
+        long <- hijos.getLength()
+        acum <- 1
+        for i <- 1 to long do 
+            acum <- acum + hijos.consultarPos(1).countNodes()
+            hijos.eliminar(1)
+        endfor
+    endif 
+    return acum 
+endfunc 
+// instanciaste lista de element en lugar de lista de arbol element 
+// no habia que instanciar acum en 0 si no en 1
+
+func ArbolBin<int>::findValue(int: valor): bool
+begin
+    if(esNulo())then
+        return false
+    endif
+    if(raiz.getInfo() = valor)then
+        return true
+    else
+        return getHijoIzq().findValue(valor) || getHijoDer().findValue(valor)
+    endif
+endfunc
+
+// esta bueno!
+
+func ArbolBin<int>::findMax(): int
+begin
+    if(esNulo())then
+        return 0
+    endif
+    if(peso = 1)then
+        return getInfo()
+    endif
+    return max(getInfo(),max(getHijoIzq.findMax(),getHijoDer().findMax))
+endfunc
+
+// no verificaste existencia de hijos 
+// retornaste 0 cuando el arbol puede ser negativo
+
+func ArbolBin<int>::sumAllNodes(): int
+var
+    int: sumaIzq,sumaDer
+begin
+    if(esNulo())then
+        return 0
+    endif
+    if(!getHijoIzq().esNulo())then
+        sumaIzq <- getHijoIzq().sumAllNodes()
+    endif
+    if(!getHijoDer().esNulo())then
+        sumaDer <- getHijoDer().sumAllNodes()
+    endif
+    return getInfo() + sumaIzq + sumaDer
+endfunc
+
+// falto inicializar variables en 0
+// con el caso base no hace falta proteger cada llamada
+
+func ArbolN<int>::getHeight(): int
+var
+    Lista<ArbolN<int>>: hijos
+    int: len,maxHij
+begin
+    if(instance.esNulo())then
+        return -1
+    else
+        maxHij <- -1
+        hijos <- instance.getHijos()
+        len <- hijos.getLength()
+        for i <- 1 to len do
+            maxHij <- max(maxHij,hijos.consultarPos(1).getHeight())
+            hijos.eliminar(1)
+        endfor 
+        return 1 + maxHij
+endfunc 
+
+//te ayudo la IA no tiene merito
+
+func ArbolBin<Element>::levelOrderTraversal(): Lista<Lista<Element>>
+var 
+    Lista<Lista<Element>>: result
+    Lista<Element>: nivel 
+    Cola<PointerToNodo<ArbolBin<Element>>>: aux
+    PointerToNodo<Element>: hijoIzq,hijoDer
+    int: len
+begin
+    result.construir()
+    aux.construir()
+    if(instance.esNulo())then
+        return result
+    endif
+    aux.encolar(instance.raiz)
+    while(!aux.esVacia())do
+        nivel.construir()
+        len <- aux.getLength()
+        for i <- 1 to len do
+            nivel.insertar(aux.getHead()^.getInfo(),nivel.getLength()+1)
+            hijoIzq <- aux.getHead()^.getHijoIzq()
+            hijoDer <- aux.getHead()^.getHijoDer()
+            if(hijoIzq)then
+                aux.encolar(hijoIzq)
+            endif
+            if(hijoDer)then
+                aux.encolar(hijoDer)
+            endif
+            aux.desencolar()
+        endfor
+        result.insertar(nivel,result.getLength()+1)
+    endwhile
+    return result
+endfunc
+
+// tuve que ayudarme de la implementacion del profesor y chatgpt
+
+
+func ArbolBin<Element>::getDiameter(): int
+var
+    int: maxDiametro 
+begin
+    if(instance.esNulo())then
+        return -1
+    endif
+    maxDiametro <- 0
+    getDiameterAux(instance.raiz,maxDiametro)
+    return maxDiametro
+endfunc
+
+int getDiameterAux(PointerToNodoBin<Element> ptr,ref: maxDiametro)
+var
+    int: alturaIzq,alturaDer,diametroLocal
+begin
+    if(!ptr)then
+        return -1
+    endif
+    alturaIzq <- getDiameterAux(ptr^.getHijoIzq(),maxDiametro)
+    alturaDer <- getDiameterAux(ptr^,getHijoDer(),maxDiametro)
+
+    diametroLocal <- (alturaIzq + 1) + (alturaDer + 1)
+
+    if(diametroLocal > maxDiametro)then
+        maxDiametro <- diametroLocal
+    endif
+
+    return 1 + max(alturaIzq,alturaDer)
+endfunc
+
+// copie practicamente completo el ejercicio de programacion
+
+func ArbolN<Element>::getMaxWidth(): int
+var
+    Cola<PointerToNodoN<Element>>: aux
+    Lista<Element>: nivel 
+    PointerToNodoN<Element>: info
+    PointerToNodoN<Element>: hijo
+    int: max,len,i
+begin
+    max <- 0
+    if(instance.esNulo())then
+        return max
+    endif
+    aux.construir()
+    aux.encolar(instance.raiz)
+    while(!aux.esVacia())do
+        nivel.construir()
+        len <- aux.getLength()
+        for i <- 1 to len do
+            nivel.insertar(aux.getHead()^.getInfo(),nivel.getLength()+1)
+            hijo <- aux.getHead()^.getHijoIzq()
+            while(hijo)do
+                aux.encolar(hijo)
+                hijo <- hijo^.getHermanoDer()
+            endwhile
+            aux.desencolar()
+        endfor
+        if(nivel.getLength() > max)then
+            max <- nivel.getLength()
+        endif
+    endwhile
+    return max
+endfunc
+
+// tuve que ayudarme de la implementacion del profe + el ejercicio de levelOrderTraversal
+// errores de sintaxis y declaracion        
+
+
+func ArbolBinario<int>::getMinDepth(): int
+var
+    int: caminoIzq,caminoDer
+begin
+    if(instance.esNulo())then
+        return -1
+    else
+        caminoIzq <- 1 + instance.getHijoIzq().getMinDepth()
+        caminoDer <- 1 + instance.getHijoDer().getMinDepth()
+    endif
+    if(caminoIzq = 0 && caminoDer > 0) return caminoDer
+    if(caminoDer = 0 && caminoIzq > 0) return caminoIzq
+    return min(caminoIzq,caminoDer)
+endfunc
+
+// no tome cuenta el caso en que el arbol tiene solo un hijo 
+
+func ArbolBinario<int>::getMinDepth(): int
+var
+    int: caminoIzq,caminoDer
+begin
+    if(instance.getHijoIzq().esNulo() && instance.getHijoDer().esNulo())then
+        return 0
+    else
+        if(!instance.getHijoIzq.esNulo())then
+            caminoIzq <- 1 + instance.getHijoIzq().getMinDepth()
+        endif
+        if(!instance.getHijoDer().esNulo())then
+            caminoDer <- 1 + instance.getHijoDer().getMinDepth()
+        endif
+    endif
+    if(caminoIzq = 0 && caminoDer > 0) return caminoDer
+    if(caminoDer = 0 && caminoIzq > 0) return caminoIzq
+    return min(caminoIzq,caminoDer)
+endfunc
+/* getMinDepth corregido */
+
+func ArbolBST<int>::lowestCommonAncestor(int:nodo1,nodo2): int
+var
+    int: LCA
+begin
+    if(instance.esNulo())then
+        return 0
+    endif
+    if(nodo1 < instance.getInfo() && nodo2 < instance.getInfo())then
+        LCA <- instance.getHijoizq().lowestCommonAncestor(nodo1,nodo2)
+    endif
+    if(nodo1 > instance.getInfo() && nodo2 > instance.getInfo())then
+        LCA <- instance.getHijoDer().lowestCommonAncestor(nodo1,nodo2)
+    endif
+    if(nodo1 < instance.getInfo() && instance.getInfo() < nodo2 || nodo1 == instance.getInfo || nodo2 == instance.getInfo())then
+        LCA <- instance.getInfo()
+    endif
+    return LCA
+endfunc
+
+// malisimo al principio tuviste que pedir ayuda a chatgpt
+
+func ArbolN<Element>::levelOrderTraversal():Lista<Lista<Element>>
+var
+    Cola<PointerToNodoN<Element>>: aux
+    Lista<Elemetn>: sublist
+    Lista<Lista<Element>: result
+    PointerToNodoN<Element>: hijo
+    int: i,actLen
+begin
+    result.construir()
+    if(instance.esNulo())then
+        return result
+    endif
+    aux.construir()
+    aux.encolar(instance.raiz)
+    while(!aux.esVacia())do
+        actLen <- aux.getLength()
+        for i <- 1 to actLen do
+            hijo <- aux.getHead().getHijoIzq()
+            while hijo do
+                aux.encolar(hijo)
+                hijo <- hijo.getHermanoDer()
+            endwhile
+            sublist.insertar(aux.getHead(),sublist.getLength()+1)
+            aux.desencolar()
+        endfor
+        result.insertar(sublist,result.getLength()+1)
+        sublist.vaciar()
+    endwhile
+    return result
+endfunc
+
+// insertar en sublist debió ser aux.getHead().getInfo() porque estas insertando el resultado
+
+// ni me acuerdo de la sintaxis de registros en pseudo
+record: Nodo
+    int: col
+    int: nivel
+    int: dato 
+endrecord
+
+proc ArbolBin<int>::almacenarNodos(int: col,int: nivel,ref: Lista<Nodo> list)
+var
+    Nodo: actual
+begin
+    if(instance.esNulo())then
+        return
+    else
+        actual.nivel <- nivel
+        actual.col <- col
+        actual.dato <- instance.getInfo()
+        list.insertar(actual,list.getLength()+1)
+        instance.getHijoIzq().almacenarNodos(col-1,nivel+1,list)
+        instance.getHijoDer().almacenarNodos(col+1,nivel+1,list)
+    endif
+endfunc
+
+func ordenarNodos(Lista<Nodo> list): Lista<Nodo>
+var
+    Lista<Nodo>: result,listA,listB
+    int: half,end
+begin
+    result.construir()
+    listA.construir()
+    listB.construir()
+    end <- list.getLength()
+    half <- end / 2
+    for i <- 1 to half do
+        listA.insertar(list.consultarPos(1),listA.getLength()+1)
+        list.eliminar(1)
+    endfor
+    for i <- half to end do
+        listB.insertar(list.consultarPos(1),listB.getLength()+1)
+        list.eliminar(1)
+    endfor
+    result <- mergeSort(listA,listB) 
+    // asumimos que magicamente existe una funcion mergesort que cumpla con los criterios de ordenamiento del ejercicio
+    // (si columna es igual sortear por nivel, si nivel es igual sortear por valor)
+    return result
+endfunc 
+
+func ArbolBin<int>::verticalTraversal(): Lista<Lista<int>>
+var
+    Nodo: act
+    Lista<Nodo>: nodos
+    Lista<int>: sublist
+    Lista<Lista<int>: result
+    int: i,colAct
+begin
+    result.construir()
+    if(instance.esNulo())then
+        return result
+    endif
+    instance.almacenarNodos(0,0,nodos)
+    nodos <- ordenarNodos(nodos)
+    colAct <- nodos.cosnultarPos(1).col
+    len <- nodos.getLength()
+    for i <- to len do
+        act <- nodos.consultarPos(1)
+        nodos.eliminar(1)
+        if(act.col = colAct)then
+            sublist.insertar(act.dato)
+        else
+            result.insertar(sublist,result.getLength()+1)
+            sublist.vaciar()
+            colAct <- act.col
+        endif
+    endfor
+    return result
+endfunc
+
+// nodos no fue construido antes de llenarse
+// half y end mal planteados
+// no confirmaste si se lleno la ultima sublista
+// el ejercicio solo funciona bajo la convencion de que existe una funcion que sortea la lista de structs en O(logn)
+// que ejercicio tan ijodeputa
+
+func ArbolBin<Element>::getLowestCommonAncestor(int: nodo1,nodo2): int
+var
+    PointerToNodoBin<int>: LCA
+begin
+    LCA <- LCA(nodo1,nodo2)
+    if(LCA)then
+        return LCA.getInfo()
+    endif
+endfunc
+
+func ArbolBin<int>::LCA(int: nodo1,nodo2): PointerToNodoBin<int>
+var
+    PointerToNodoBin<int>: left,right
+begin
+    if(instance.esNulo())then
+        return NULL
+    endif
+    if(instance.getInfo() = nodo1 || instance.getInfo() == nodo2)then
+        return instance.raiz
+    endif
+    left <- instance.getHijoIzq().LCA(nodo1,nodo2)
+    right <- instance.getHijoDer().LCA(nodo1,nodo2)
+    if(left != NULL && right != NULL)then
+        return instance.raiz // LCA 
+    endif
+    if(left != NULL)then
+        return left
+    endif
+    if(right != NULL)then
+        return right
+    endif
+    return NULL
+endfunc
+
+// error de sintaxis, debiste pasar un puntero como parametro a LCA instance no es un puntero es un objeto arbol
+
+/* FUNCION LCA ARREGLADA */
+
+func ArbolBin<int>::LCA(PointerToNodoBin<int>: ptr,int: nodo1,nodo2): PointerToNodoBin<int>
+var
+    PointerToNodoBin<int>: left,right
+begin
+    if(!ptr)then
+        return NULL
+    endif
+    if(ptr^.getInfo() = nodo1 || ptr^.getInfo() == nodo2)then
+        return ptr
+    endif
+    left <- LCA(ptr^.getHijoIzq(),nodo1,nodo2)
+    right <- LCA(ptr^.getHijoDer(),nodo1,nodo2)
+    if(left && right)then
+        return ptr // LCA 
+    endif
+    if(left)then
+        return left
+    endif
+    if(right)then
+        return right
+    endif
+    return NULL
+endfunc
+
+// tuve que ver un tutorial de yt para entender el flujo del programa
+// practicamente copie el algoritmo
+// necesite bastante ayuda de la IA
+// si nodo1 o nodo2 no estan en el algoritmo el LCA retorna el nodo que si esta cuando no deberia retornar nada
+
+// se asume que el arbol de sintaxis siempre tendra dos operandos por cada operador
+// asumimos la existencia de las funciones auxiliares stringToInt() y stringToChar()
+func ArbolBin<string>::evaluateExpression(): int
+var
+    int: exp 
+begin   
+    if(instance.esNulo())then
+        return 0
+    endif
+    exp <- evaluateExpression(instance.raiz)
+    return exp
+endfunc
+
+func ArbolBin<string>::evaluateExpression(PointerToNodoBin<string>: ptr): int
+var
+    string: op
+    int: a,b
+begin
+    if(!ptr^.getHijoizq() && !ptr^.getHijoDer())then
+        return stringToInt(ptr^.getInfo())
+    else
+        a <- instance.evaluateExpression(ptr^.getHijoizq())
+        op <- ptr^.getInfo()
+        b <- instance.evaluateExpression(ptr^.getHijoDer())
+        return operar(a,b,op)
+    endif
+endfunc
+
+func operar(int: a,b,string: op): int
+var
+    int: result
+begin
+    op <- stringToChar(op)
+    switch(op)
+        case '+'
+            return a + b
+            break
+        case '-'
+            return a - b
+            break 
+        case '*'
+            return a * b 
+            break 
+        case '/'
+            return a / b 
+            break 
+        default
+            return 0
+    endswitch
+endfunc 
+
+// pequeños errores de sintaxis pero lo hiciste bien!
+
+func ArbolN<int>::getDiameter(): int
+var
+    int: diametro 
+begin
+    if(instance.esNulo())then
+        return -1
+    endif
+    diametro <- 0
+    diametero <- getDiameter(instance.raiz)
+    return diametro
+endfunc
+
+func getDiameter(PointerToNodoN<int>: ptr,ref: int: maxDiam): int
+var
+    int: altura,max1,max2
+    PointerToNodoN<int>: hijo
+begin
+    max1 <- 0
+    max2 <- 0
+    hijo <- ptr^.getHijoIzq()
+    while(hijo)do
+        altura <- 1 + instance.getDiameter(hijo,maxDiam)
+        if(altura > max1)then
+            max2 <- max1
+            max1 <- altura
+        else
+            if(altura > max2)then
+                max2 <- altura
+            endif
+        endif
+        hijo <- hijo^.getHermanoDer()
+    endwhile
+    if(max1 + max2 > maxDiam)then
+            maxDiam <- max1 + max2
+        endif
+    return max1
+endfunc
+
+// te ayudo la IA completamente, desmeritado
+// no pude divisar como hacer la logica de los dos maxs en una pasada
