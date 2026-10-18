@@ -5,14 +5,15 @@ var
     int i,n 
 begin
     result.construir()
-    for i <- to n do
+    n <- g.getNvertices()
+    for i <- 1 to n do
         visitados[i] <- false
     endfor
     DFS(g,target,visitados,result)
     return result
 endfunc
 
-proc DFS(ref: Grafo<Element>: g,int: v,ref: array[1..N] of bool: visitados,Lista<Element>: result)
+proc DFS(ref: Grafo<Element>: g,int: v,ref: array[1..N] of bool: visitados,ref: Lista<Element>: result)
 var
     Lista<Element>: vecinos
     int: w
@@ -25,6 +26,6 @@ begin
         if(!visitados[w])then
             DFS(g,w,visitados,result)
         endif
-        result.eliminar(1)
+        vecinos.eliminar(1)
     endwhile
 endproc

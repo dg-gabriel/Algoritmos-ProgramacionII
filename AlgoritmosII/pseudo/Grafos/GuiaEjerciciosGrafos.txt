@@ -1,0 +1,10 @@
+3. Conteo del grado de un nodo
+Dado un grafo no dirigido representado mediante lista de adyacencia, calcule el grado de un nodo (cantidad de aristas
+incidentes).
+
+func gradoNodo(Grafo<int>: g,int: v): int
+var
+    Lista<int>: vecinos 
+begin
+    return vecinos.getLength()
+endfunc

@@ -5,10 +5,25 @@ Attributes:
         PointerToNodoVertice<Element>: siguiente
         PointerToNodoArco<Element>: listaAdy
     Methods:
+    proc construir(Element: info,PointerToNodoVertice<Element>: sig,PointerToNodoArco<Element>: listaAdy)
     .
     .
     .
-endClass
+endclass
+
+Class NodoArco<Element>
+Attributes:
+    Private:
+        PointerToNodoVertice<Element>: info
+        PointerToNodoArco<Element>: siguiente
+        float: peso
+Methods:
+    Public:
+        proc construir(...)
+        .
+        .
+        .
+endclass
 
 Class Grafo<Element>
 Attributes

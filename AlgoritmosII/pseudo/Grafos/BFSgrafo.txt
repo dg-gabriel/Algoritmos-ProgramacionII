@@ -5,7 +5,7 @@ var
     Array[1...N] of bool: visitados
     Cola<int>: cola
 begin
-    for i <- to g.getNvertices() do
+    for i <- 1 to g.getNvertices() do
         visitados[i] <- false
     endfor
     visitados[inicial] <- true
@@ -15,7 +15,7 @@ begin
     while(!cola.esVacia())do
         v <- cola.getHead()
         result.insertar(v,result.getLength()+1)
-        vecinos <- g.getVecinos()
+        vecinos <- g.getVecinos(v)
         while(!vecinos.esVacia())do
             w <- vecinos.consultarPos(1)
             if(!visitados[w])then
