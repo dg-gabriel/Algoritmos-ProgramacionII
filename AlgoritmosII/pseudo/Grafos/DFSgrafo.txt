@@ -1,0 +1,30 @@
+func DFS(Grafo<Element>: g,Element: target): Lista<Element>
+var
+    array[1..N] of bool: visitados
+    Lista<Element: result
+    int i,n 
+begin
+    result.construir()
+    for i <- to n do
+        visitados[i] <- false
+    endfor
+    DFS(g,target,visitados,result)
+    return result
+endfunc
+
+proc DFS(ref: Grafo<Element>: g,int: v,ref: array[1..N] of bool: visitados,Lista<Element>: result)
+var
+    Lista<Element>: vecinos
+    int: w
+begin 
+    result.insertar(v,result.getLength()+1)
+    visitados[v] <- true
+    vecinos <- g.getVecinos(v)
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultarPos(1)
+        if(!visitados[w])then
+            DFS(g,w,visitados,result)
+        endif
+        result.eliminar(1)
+    endwhile
+endproc
