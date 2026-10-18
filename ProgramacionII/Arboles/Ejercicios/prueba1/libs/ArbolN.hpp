@@ -52,19 +52,37 @@ NodoN<Element>* ArbolN<Element>::copiarNodos(NodoN<Element>* ptr){
     if(!ptr){
         return NULL;
     }
-    else{
-        NodoN<Element>* nuevoN = new
-        NodoN<Element>(ptr->getInfo(),copiarNodos(ptr->getHijoIzq()),copiarNodos(ptr->getHermanoDer()));
-        return nuevoN;
+
+    NodoN<Element>* primero = NULL;
+    NodoN<Element>* ultimo = NULL;
+    NodoN<Element>* actual = ptr;
+
+    while(actual != NULL){
+        NodoN<Element>* nuevo = new NodoN<Element>(actual->getInfo(),copiarNodos(actual->getHijoIzq()),NULL);
+
+        if(primero == NULL){
+            primero = nuevo;
+        }
+        else{
+            ultimo->setHermanoDer(nuevo);
+        }
+        ultimo = nuevo;
+        actual = actual->getHermanoDer();
     }
+
+    return primero;
 }
 
 template <class Element>
 int ArbolN<Element>::contarNodos(NodoN<Element> *ptr){
-    if(!ptr){
-        return 0;
+    int total = 0;
+    NodoN<Element>* actual = ptr;
+    
+    while(actual != NULL){
+        total += 1 + contarNodos(actual->getHijoIzq());
+        actual = actual->getHermanoDer();
     }
-    return 1 + contarNodos(ptr->getHijoIzq()) + contarNodos(ptr->getHermanoDer());
+    return total;
 }
 
 template <class Element>
@@ -83,13 +101,14 @@ int ArbolN<Element>::alturaAux(NodoN<Element> *ptr){
 
 template <class Element>
 void ArbolN<Element>::destruirNodo(NodoN<Element>* ptr){
-    if(!ptr){
-        return;
-    }
-    else{
-        destruirNodo(ptr->getHijoIzq());
-        destruirNodo(ptr->getHermanoDer());
-        delete ptr;
+    NodoN<Element>* actual = ptr;
+    
+
+    while(actual != NULL){
+        NodoN<Element>* sigHermano = actual->getHermanoDer();
+        destruirNodo(actual->getHijoIzq()); 
+        delete actual;                      
+        actual = sigHermano;
     }
 }
 
@@ -369,18 +388,16 @@ template <class Element>
 void ArbolN<Element>::llenarPadresHijos(list<Element> padres, list<Element> hijos){
     vaciar();
     
-    // Si la entrada viene completamente vacía
     if(padres.empty() && hijos.empty()){
         return;
     }
 
-    // Si solo hay una relación o el primer padre es único y no tiene hijos en la lista
     Element datoRaiz = padres.front();
     raiz = new NodoN<Element>(datoRaiz, NULL, NULL);
     peso = 1;
 
     if(hijos.empty()){
-        return; // Caso de un árbol de 1 solo nodo (solo raíz)
+        return; 
     }
 
     map<Element, NodoN<Element>* > nodos;

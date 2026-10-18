@@ -1,31 +1,45 @@
 #include "ArbolBin.hpp"
+#include "ArbolN.hpp"
 #include <iostream>
 #include <sstream>
+#include <ctime>
 #include <list>
 
 using namespace std;
 
-void leerEntrada(ArbolBin<int> &tree){
-    list<int> in,pre;
-    string line1,line2;
-    while(getline(cin,line1)){
-        getline(cin,line2);
-        stringstream ss1(line1);
-        stringstream ss2(line2);
-        int data;
-        while(ss1 >> data){
-            in.push_back(data);
-        }
-        while(ss2 >> data){
-            pre.push_back(data);
-        }
+void leerEntrada(ArbolN<int> &tree){
+    int padre,hijo;
+    list<int> padres,hijos;
+    while(cin >> padre >> hijo){
+        padres.push_back(padre);
+        hijos.push_back(hijo);
     }
-    tree.llenarPreIn(pre,in);
+    tree.llenarPadresHijos(padres,hijos);    
 }
 
 int main(){
-    ArbolBin<int> sacrificio;
+    ArbolN<int> sacrificio;
+    
+    cout << "lectura" << endl;
+    clock_t inicio = clock();
     leerEntrada(sacrificio);
-    cout << "leyo el arbol" << endl;
+    clock_t fin = clock();
+    double segundos = double(fin - inicio) / CLOCKS_PER_SEC;
+    cerr << "tiempo lectura: " << segundos << " s" << endl;
+
+
+    cout << "getAltura" << endl;
+    inicio = clock();
     cout << sacrificio.getAltura() << endl;
+    fin = clock();
+    segundos = double(fin - inicio) / CLOCKS_PER_SEC;
+    cerr << "tiempo getAltura(): " << segundos << " s" << endl;
+
+    inicio = clock();
+    ArbolN<int> otroArbol = sacrificio;
+    fin = clock();
+    segundos = double(fin - inicio) / CLOCKS_PER_SEC;
+    cerr << "tiempo asignacion: " << segundos << " s" << endl;
+
+    cout << "raiz: " << otroArbol.getRaiz() << endl;
 }

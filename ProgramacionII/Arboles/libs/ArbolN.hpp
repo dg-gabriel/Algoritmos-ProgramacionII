@@ -52,19 +52,37 @@ NodoN<Element>* ArbolN<Element>::copiarNodos(NodoN<Element>* ptr){
     if(!ptr){
         return NULL;
     }
-    else{
-        NodoN<Element>* nuevoN = new
-        NodoN<Element>(ptr->getInfo(),copiarNodos(ptr->getHijoIzq()),copiarNodos(ptr->getHermanoDer()));
-        return nuevoN;
+
+    NodoN<Element>* primero = NULL;
+    NodoN<Element>* ultimo = NULL;
+    NodoN<Element>* actual = ptr;
+
+    while(actual != NULL){
+        NodoN<Element>* nuevo = new NodoN<Element>(actual->getInfo(),copiarNodos(actual->getHijoIzq()),NULL);
+
+        if(primero == NULL){
+            primero = nuevo;
+        }
+        else{
+            ultimo->setHermanoDer(nuevo);
+        }
+        ultimo = nuevo;
+        actual = actual->getHermanoDer();
     }
+
+    return primero;
 }
 
 template <class Element>
 int ArbolN<Element>::contarNodos(NodoN<Element> *ptr){
-    if(!ptr){
-        return 0;
+    int total = 0;
+    NodoN<Element>* actual = ptr;
+    
+    while(actual != NULL){
+        total += 1 + contarNodos(actual->getHijoIzq());
+        actual = actual->getHermanoDer();
     }
-    return 1 + contarNodos(ptr->getHijoIzq()) + contarNodos(ptr->getHermanoDer());
+    return total;
 }
 
 template <class Element>
@@ -83,13 +101,14 @@ int ArbolN<Element>::alturaAux(NodoN<Element> *ptr){
 
 template <class Element>
 void ArbolN<Element>::destruirNodo(NodoN<Element>* ptr){
-    if(!ptr){
-        return;
-    }
-    else{
-        destruirNodo(ptr->getHijoIzq());
-        destruirNodo(ptr->getHermanoDer());
-        delete ptr;
+    NodoN<Element>* actual = ptr;
+    
+
+    while(actual != NULL){
+        NodoN<Element>* sigHermano = actual->getHermanoDer();
+        destruirNodo(actual->getHijoIzq()); 
+        delete actual;                      
+        actual = sigHermano;
     }
 }
 
