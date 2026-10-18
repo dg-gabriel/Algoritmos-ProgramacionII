@@ -1,14 +1,28 @@
-CXX = g++
-CXXFLAGS = -Wall -Wextra -pedantic -std=c++98
+# Compilador a utilizar
+CXX ?= g++
+
+# Banderas del compilador 
+# -std=c++98: Utiliza el estándar C++98
+# -Wall: Activa todas las advertencias del compilador para detectar errores
+# -Ilibs: Incluye la carpeta 'libs' en la ruta de búsqueda de archivos #include
+CXXFLAGS = -std=c++98 -Wall -Wextra -Ilibs
+
+# Nombre del archivo ejecutable de salida
 TARGET = arboles
 
+# Archivos fuente (en este caso solo main.cpp ya que las librerías son templates .hpp)
+SOURCES = main.cpp
+
+# Regla por defecto
 all: $(TARGET)
 
-$(TARGET): main.o
-	$(CXX) $(CXXFLAGS) -o $(TARGET) main.o
+# Regla para enlazar y compilar el ejecutable
+$(TARGET): $(SOURCES)
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET)
 
-main.o: main.cpp ArbolBin.hpp NodoBin.hpp ArbolN.hpp NodoN.hpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
-
+# Regla para limpiar los archivos generados (.exe o binarios)
 clean:
-	rm -f *.o $(TARGET)
+	rm -f $(TARGET) $(TARGET).exe
+
+# Evita conflictos si existen archivos con los mismos nombres que las reglas lógicas
+.PHONY: all clean
