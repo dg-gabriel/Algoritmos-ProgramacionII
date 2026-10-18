@@ -1,0 +1,30 @@
+func BFS(Grafo<int>: g,int: inicial): Lista<int>
+var
+    int: v,w,i
+    Lista<int>: result,vecinos 
+    Array[1...N] of bool: visitados
+    Cola<int>: cola
+begin
+    for i <- to g.getNvertices() do
+        visitados[i] <- false
+    endfor
+    visitados[inicial] <- true
+    result.construir()
+    cola.construir()
+    cola.encolar(inicial)
+    while(!cola.esVacia())do
+        v <- cola.getHead()
+        result.insertar(v,result.getLength()+1)
+        vecinos <- g.getVecinos()
+        while(!vecinos.esVacia())do
+            w <- vecinos.consultarPos(1)
+            if(!visitados[w])then
+                visitados[w] <- true
+                cola.encolar(w)
+            endif
+            vecinos.eliminar(1)
+        endwhile
+        cola.desencolar()
+    endwhile
+    return result
+endfunc

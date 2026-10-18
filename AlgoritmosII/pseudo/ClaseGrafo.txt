@@ -1,0 +1,39 @@
+Class NodoVertice<Element>
+Attributes:
+    Private:
+        Element: info
+        PointerToNodoVertice<Element>: siguiente
+        PointerToNodoArco<Element>: listaAdy
+    Methods:
+    .
+    .
+    .
+endClass
+
+Class Grafo<Element>
+Attributes
+    Private:
+        PointerToNodoVertice<Element>: primero
+        int: nVertices,nArcos
+Methods:
+    Public:
+        proc construir(ref: Grafo<Element>: target)             // O(n+m)
+        proc insertarVertice(Element: v)                        // O(1)
+        proc insertarArcoDirigido(Element: v w,float: peso)     // O(n)
+        proc insertarArcoNoDirigido(Element: v,w,float: peso)   // O(n)
+        func getSucesores(Element: v): Lista<Element>           // O(n+m) k <= m
+        func getPredecesores(Element: v): Lista<Element>        // O(n+m)
+        func getVecinos(Element: v): Lista<Element>             // O(n+m) k <= m 
+        func existeVertice(Element: v): bool                    // O(n)
+        func existeArco(Element: v,w): bool                     // O(n+k)
+        func getCostoArco(Element: v,w): float
+        func getArcos(bool: esDirigido): Lista<Lista<Element>>  // [[v1,v2],[v3,v4]]
+        func getVertices(): Lista<Element>
+        func esVacio(): bool
+        proc eliminarArco(Element: v,w)                         // O(n+k)
+        proc eliminarVertice(Element: v)                        // O(n+m)
+        proc modificarPesoArco(Element: v,w,float: peso)
+        func getNvertices(): int
+        func getNarcos(): int
+        proc destruir()
+endclass
