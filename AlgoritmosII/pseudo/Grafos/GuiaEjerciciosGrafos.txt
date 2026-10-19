@@ -10,5 +10,36 @@ begin
 endfunc
 
 Implemente una estructura Grafo que permita agregar nodos dinámicamente y conectar nodos mediante aristas.
-func Grafo::agregarNodo(valor: int)
-func Grafo::agregarArista(a: int, b: int)
+proc Grafo::agregarNodo(int: v)
+var
+    PointerToNodoVertice<int>: nuevo
+begin
+    nuevo <- new(NodoVertice<int>)
+    nuevo.construir(v,instance.primero,NULL)
+    instance.primero <- nuevo
+    nVertices <- nVertices + 1
+endproc
+
+proc Grafo::agregarArista(int: a,int: b)
+var
+    PointerToNodoArco<int>: nuevoArco
+    PointerToNodVertice<int>: ptrV,ptrW,ptr
+begin
+    ptr <- instance.primero
+    while(ptr)do 
+        if(ptr^.getInfo() = ptrV)then
+            ptrV <- ptr
+        else if(ptr^.getInfo() = ptrW)then
+                ptrW <- ptr 
+            endif
+        endif
+    endwhile
+    if(!ptrW || !ptrV)then
+        return
+    endif
+    nuevoArco <- new(NodoArco<int>)
+    ptrV^.setListaAdy(nuevoArco.construir(ptrW,NULL))
+    return
+endfunc
+
+
