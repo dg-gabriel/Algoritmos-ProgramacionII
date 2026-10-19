@@ -50,3 +50,7 @@ int main(){
         cout << endl;
     }
 }
+
+// divise la solucion yo solo
+// funciona pero desborda en casos extremos, se puede hacer mas optimo usando un vector como 
+// lista de adyacencia
