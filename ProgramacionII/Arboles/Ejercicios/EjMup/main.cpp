@@ -51,25 +51,50 @@ void mapearNiveles(ArbolBin<string> &arbol,map<string,int> &mapa,int nivAct){
     mapearNiveles(der,mapa,nivAct+1);
 }
 
-string obtenerLCA(ArbolBin<string> &a,string &x,string&y){
+int profundidad(ArbolBin<string> &a, string elem, int depth){
     if(a.esNulo()){
-        return "";
+        return -1;
     }
-    string raiz = a.getRaiz();
-    if(raiz == x || raiz == y){
-        return raiz;
+    if(a.getRaiz() == elem){
+        return depth;
+    }
+    
+    // Pasando por referencia los hijos para evitar copias pesadas
+    ArbolBin<string> izq = a.getHijoIzq();
+    ArbolBin<string> der = a.getHijoDer();
+    
+    int leftPath = profundidad(izq, elem, depth + 1);
+    if(leftPath != -1) return leftPath; // Si lo encuentra por la izquierda, retorna directo
+    
+    return profundidad(der, elem, depth + 1); // Si no, busca por la derecha
+}
+
+bool findValue(ArbolBin<string> &a, string elem){
+    if(a.esNulo()){
+        return false;
+    }
+    if(a.getRaiz() == elem){
+        return true;
     }
     ArbolBin<string> izq = a.getHijoIzq();
     ArbolBin<string> der = a.getHijoDer();
+    return findValue(izq, elem) || findValue(der, elem);
+}
 
-    string izqLCA = obtenerLCA(izq,x,y);
-    string derLCA = obtenerLCA(der,x,y);
-
-    if(izqLCA != "" && derLCA != ""){
-        return raiz;
+int distancia(ArbolBin<string> &a, string x, string y){
+    if(a.esNulo()){
+        return 0;
     }
-    //se devuelve el lado que haya encontrado algo
-    return (izqLCA != "") ? izqLCA : derLCA;
+    ArbolBin<string> izq = a.getHijoIzq();
+    ArbolBin<string> der = a.getHijoDer();
+    
+    if(findValue(izq, x) && findValue(izq, y)){
+        return distancia(izq, x, y);
+    }
+    if(findValue(der, x) && findValue(der, y)){
+        return distancia(der, x, y);
+    }
+    return profundidad(a, x, 0) + profundidad(a, y, 0);
 }
 
 
@@ -81,10 +106,8 @@ int obtenerMUP(ArbolBin<string> &arbol,list<string> &conj,map<string,int> &nivel
         for(; it2 != conj.end(); ++it2){
             string x = *it1;
             string y = *it2;
-            string lca = obtenerLCA(arbol,x,y);
-            int dist = niveles[x] + niveles[y] - 2 * niveles[lca];
-            mup += (dist-1) * abs(niveles[x] - niveles[y]);
-            cout << "la distancia entre " << x << " y " << y << " es de " << dist << endl;;
+            int dist = distancia(arbol,x,y)-1;
+            mup +=  dist * abs(niveles[x] - niveles[y]);
         }
     }
     return mup;
@@ -112,3 +135,5 @@ int main(){
         cout << arbolMaxMup << endl;
     }
 }
+
+// la solucion no es completamente optima no aguanta caso de desborde
