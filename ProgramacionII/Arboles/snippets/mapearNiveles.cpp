@@ -1,3 +1,7 @@
+#include <iostream>
+#include <map>
+#include "ArbolN.hpp"
+
 // Llenas el mapa una sola vez con recursión:
 void mapearNiveles(ArbolN<string> a, int nivActual, map<string, int> &mapaNivel) {
     if (a.esNulo()) return;
@@ -12,13 +16,15 @@ void mapearNiveles(ArbolN<string> a, int nivActual, map<string, int> &mapaNivel)
     }
 }
 
+int main(){
+    ArbolN<string> miArbol;
+    // uso en el main
+    map<string, int> nivel;
+    mapearNiveles(miArbol, 0, nivel); // La raíz arranca en nivel 0
 
-// uso en el main
-map<string, int> nivel;
-mapearNiveles(miArbol, 0, nivel); // La raíz arranca en nivel 0
-
-// Ahora puedes responder cualquier consulta al instante:
-cout << "El nivel de Eustaquio es: " << nivel["Eustaquio"] << endl;
-if (nivel["Casimiro"] == nivel["Ruperta"]) {
-    cout << "Estan en el mismo nivel!" << endl;
+    // Ahora puedes responder cualquier consulta al instante:
+    cout << "El nivel de Eustaquio es: " << nivel["Eustaquio"] << endl;
+    if (nivel["Casimiro"] == nivel["Ruperta"]) {
+        cout << "Estan en el mismo nivel!" << endl;
+    }
 }

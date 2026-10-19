@@ -8,3 +8,7 @@ var
 begin
     return vecinos.getLength()
 endfunc
+
+Implemente una estructura Grafo que permita agregar nodos dinámicamente y conectar nodos mediante aristas.
+func Grafo::agregarNodo(valor: int)
+func Grafo::agregarArista(a: int, b: int)
