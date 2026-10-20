@@ -1,3 +1,9 @@
+// Ej. Parcial 2020
+// "Familias"
+// no me di cuenta que el arbol era un BST
+// vibe codee la obtencion de los pares de u,v del conjunto q
+// las demas funciones las saque de la guia
+// se recontra caga encima en casos extremos por la cantidad de recursion que hace
 #include <iostream>
 #include "ArbolBin.hpp"
 #include <list>
@@ -126,6 +132,3 @@ int main(){
     }
 }
 
-// no me di cuenta que el arbol era un BST
-// vibe codee la obtencion de los pares de u,v del conjunto q
-// las demas funciones las saque de la guia

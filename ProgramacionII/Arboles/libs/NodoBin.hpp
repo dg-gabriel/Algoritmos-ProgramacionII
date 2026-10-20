@@ -1,6 +1,8 @@
 #ifndef NODOBIN_HPP
 #define NODOBIN_HPP
 
+#include <iostream>
+
 template <class Element>
 class NodoBin{
     private:

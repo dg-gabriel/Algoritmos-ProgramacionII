@@ -1,3 +1,7 @@
+// Ej Parcial 2025
+// "MUP"
+// la solucion no es completamente optima no aguanta caso de desborde
+// esta bastante copiada del ejercicio de lasfamilias
 #include <iostream>
 #include "ArbolBin.hpp"
 #include <sstream>
@@ -136,4 +140,3 @@ int main(){
     }
 }
 
-// la solucion no es completamente optima no aguanta caso de desborde

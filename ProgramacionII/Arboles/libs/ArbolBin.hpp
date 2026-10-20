@@ -42,7 +42,8 @@ class ArbolBin{
         ArbolBin(const ArbolBin<Element>& target);                              // O(n), constructor copia
         ~ArbolBin();                                                            // O(n), destructor
         ArbolBin<Element>& operator=(const ArbolBin<Element>& target);          // O(n), sobrecarga del op. de asignacion
-        void construir(Element e,ArbolBin<Element> &a1,ArbolBin<Element> &a2);  // O(n), constructor de ensamblaje
+        void construir(Element e,ArbolBin<Element> const &a1,                   // O(n), constructor de ensamblaje
+                                 ArbolBin<Element> const &a2);                   
         void copiar(ArbolBin<Element> &target);                                 // O(n), copia la instancia al target
         bool esNulo();                                                          // O(1), true si es vacio, false si no
         Element getRaiz();                                                      // O(1), retorna la raiz
@@ -280,7 +281,7 @@ ArbolBin<Element>& ArbolBin<Element>::operator=(const ArbolBin<Element>& target)
 }
 
 template <class Element>
-void ArbolBin<Element>::construir(Element e, ArbolBin<Element> &a1, ArbolBin<Element> &a2){
+void ArbolBin<Element>::construir(Element e, const ArbolBin<Element> &a1, const ArbolBin<Element> &a2){
     NodoBin<Element>* izq = copiarNodos(a1.raiz);
     NodoBin<Element>* der = copiarNodos(a2.raiz);
     int nuevoPeso = a1.peso + a2.peso + 1;

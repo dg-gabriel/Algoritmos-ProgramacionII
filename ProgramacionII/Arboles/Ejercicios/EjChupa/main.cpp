@@ -1,3 +1,8 @@
+// Ej. Parcial 2025
+// "CHUPA"
+// semerenda fumada
+// cumple con toda la complejidad pero de vaina usa arboles
+// me apoye de la IA para aprender a usar los mapas
 #include <iostream>
 #include <vector>
 #include <list>
@@ -77,6 +82,3 @@ int main(){
 }
 
 
-// semerenda fumada
-// cumple con toda la complejidad pero de vaina usa arboles
-// me apoye de la IA para aprender a usar los mapas

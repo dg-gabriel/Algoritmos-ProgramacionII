@@ -1,3 +1,7 @@
+// Ej Parcial 2023
+// "Recorrido de la rata"
+// no adapte del todo bien el recorrido serpentina del prof, me costo
+// aprendi que stringstream no es tan costoso en memoria como pensaba si se usa sin redeclarar
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -108,5 +112,3 @@ int main(){
 
 }
 
-// no adapte del todo bien el recorrido serpentina del prof
-// aprendi que stringstream no es tan costoso en memoria como pensaba si se usa sin redeclarar

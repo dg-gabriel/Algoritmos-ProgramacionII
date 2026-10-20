@@ -1,3 +1,8 @@
+// Ej. Parcial 2026
+// "Ruta de Defensa"
+// divise la solucion yo solo
+// funciona pero desborda en casos extremos 
+//se puede hacer mas optimo usando un vector como lista de adyacencia
 #include <iostream>
 #include <list>
 #include <vector>
@@ -50,7 +55,3 @@ int main(){
         cout << endl;
     }
 }
-
-// divise la solucion yo solo
-// funciona pero desborda en casos extremos, se puede hacer mas optimo usando un vector como 
-// lista de adyacencia
