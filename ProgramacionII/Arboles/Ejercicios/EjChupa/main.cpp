@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+#include <list>
+#include "ArbolN.hpp"
+
+using namespace std;
+
+void leerEntrada(ArbolN<int> &a,vector<int> &values,int nNodos){
+    list<int> padres,hijos;
+    int padre,hijo;
+    for(int i=1;i<=nNodos;i++){
+        cin >> values[i];
+    }
+    for(int i=0;i<nNodos-1;i++){
+        cin >> padre >> hijo;
+        padres.push_back(padre);
+        hijos.push_back(hijo);
+    }
+    a.llenarPadresHijos(padres,hijos);
+}
+
+int calcularMSI(map<int,int> &niveles,vector<int> &values){
+    int maxMSI = 0;
+    map<int,list<int> > mapaInvertido;
+
+    for(map<int, int>::iterator it = niveles.begin(); it != niveles.end(); ++it){
+        int nivelDelNodo = it->second;  
+        int valorNodo = it->first;   
+    
+        mapaInvertido[nivelDelNodo].push_back(valorNodo);
+    }
+
+    for(int i=0;i<mapaInvertido.size();i++){
+        list<int> nivelAct = mapaInvertido[i];
+        int MSI = 0;
+        for(list<int>::iterator it = nivelAct.begin(); it != nivelAct.end(); ++it){
+            MSI += values[*it];
+        }
+        if(MSI > maxMSI){
+            maxMSI = MSI;
+        }
+    }
+    return maxMSI;
+}
+
+int calcularBalance(map<int,list<int> > &mapaHijos,map<int,int> &niveles){
+    int nPares = 0,nImp = 0;
+    for(map<int,list<int> >::iterator it = mapaHijos.begin(); it != mapaHijos.end(); ++it){
+        if(it->second.empty()){
+            if(niveles[it->first] % 2 == 0){
+                nPares++;
+            }
+            else{
+                nImp++;
+            }
+        }
+    }
+    return nPares - nImp;
+}
+
+int main(){
+    int nCasos;
+    cin >> nCasos;
+    for(int i=0;i<nCasos;i++){
+        int nNodos;
+        cin >> nNodos;
+        ArbolN<int> arbol;
+        vector<int> values(nNodos + 1);
+        leerEntrada(arbol,values,nNodos);
+        map<int,int> niveles;
+        map<int,list<int> > hijos;
+        arbol.mapearNiveles(niveles);
+        arbol.mapearHijos(hijos);
+        int result = calcularMSI(niveles,values) * calcularBalance(hijos,niveles);
+        cout << result << endl;
+    }
+}
+
+
+// semerenda fumada
+// cumple con toda la complejidad pero de vaina usa arboles
+// me apoye de la IA para aprender a usar los mapas
