@@ -20,10 +20,15 @@ class ArbolN{
         int contarNodos(NodoN<Element> *ptr);                                   // O(n), aux para obtener peso
         int alturaAux(NodoN<Element> *ptr);                                     // O(n), aux para obtener altura
         void destruirNodo(NodoN<Element>* ptr);                                 // O(n), aux para vaciar
-        void preOrdenAux(NodoN<Element> *ptr,list<Element>& lista);
+        void preOrdenAux(NodoN<Element> *ptr,list<Element>& lista);             // auxiliares para recorridos 
         void inOrdenAux(NodoN<Element> *ptr,list<Element>& lista);
         void postOrdenAux(NodoN<Element> *ptr,list<Element>& lista);
+        // auxiliar para imprimir el arbol
         void imprimirArbolAux(NodoN<Element> *ptr,string prefijo,bool esUltimo);
+         // auxiliares para mapeo
+        void mapearNivelesAux(NodoN<Element>* ptr, int nivelActual, map<Element, int>& mapa);
+        void mapearPadresAux(NodoN<Element>* ptr, map<Element, Element>& mapa);
+        void mapearHijosAux(NodoN<Element>* ptr, map<Element, list<Element> >& mapa);
 
     public:
         ArbolN();                                                               // O(1), constructor
@@ -43,6 +48,9 @@ class ArbolN{
         list<Element> inOrden();                                                // O(n), recorrido en inorden
         list<Element> postOrden();                                              // O(n), recorrido en postorden
         void imprimirArbol();                                                   // O(n), visualizacion del arbol para depurar
+        void mapearNiveles(map<Element, int>& mapa);                            // O(n), llena un mapa con el nivel de cada nodo
+        void mapearPadres(map<Element, Element>& mapa);                         // O(n), llena un mapa con el padre de cada nodo
+        void mapearHijos(map<Element, list<Element> >& mapa);                   // O(n), llena un mapa con los hijos de cada nodo
         void llenarPadresHijos(list<Element> padres, list<Element> hijos);      // O(nlogn), llenado desde una columna (lista) de padres y una de hijos
         void vaciar();                                                          // O(n), llama a destruirNodo para limpiar el arbol
 };
@@ -190,6 +198,54 @@ void ArbolN<Element>::imprimirArbolAux(NodoN<Element>* nodo,string prefijo,bool 
             hijo->getHermanoDer() == NULL
         );
 
+        hijo = hijo->getHermanoDer();
+    }
+}
+
+template <class Element>
+void ArbolN<Element>::mapearNivelesAux(NodoN<Element>* ptr, int nivelActual, map<Element, int>& mapa){
+    if(!ptr){
+        return;
+    }
+    mapa[ptr->getInfo()] = nivelActual;
+    
+    NodoN<Element>* hijo = ptr->getHijoIzq();
+    while(hijo != NULL){
+        mapearNivelesAux(hijo, nivelActual + 1, mapa);
+        hijo = hijo->getHermanoDer();
+    }
+}
+
+template <class Element>
+void ArbolN<Element>::mapearPadresAux(NodoN<Element>* ptr, map<Element, Element>& mapa){
+    if(!ptr){
+        return;
+    }
+    
+    NodoN<Element>* hijo = ptr->getHijoIzq();
+    while(hijo != NULL){
+        mapa[hijo->getInfo()] = ptr->getInfo();
+        mapearPadresAux(hijo, mapa);
+        hijo = hijo->getHermanoDer();
+    }
+}
+
+template <class Element>
+void ArbolN<Element>::mapearHijosAux(NodoN<Element>* ptr, map<Element, list<Element> >& mapa){
+    if(!ptr){
+        return;
+    }
+    
+    if(mapa.find(ptr->getInfo()) == mapa.end()){
+        mapa[ptr->getInfo()] = list<Element>();
+    }
+
+    NodoN<Element>* hijo = ptr->getHijoIzq();
+    while(hijo != NULL){
+        mapa[ptr->getInfo()].push_back(hijo->getInfo());
+        
+        mapearHijosAux(hijo, mapa);
+        
         hijo = hijo->getHermanoDer();
     }
 }
@@ -385,21 +441,37 @@ void ArbolN<Element>::imprimirArbol(){
 }
 
 template <class Element>
+void ArbolN<Element>::mapearNiveles(map<Element, int>& mapa){
+    mapa.clear();
+    mapearNivelesAux(raiz, 0, mapa);
+}
+
+template <class Element>
+void ArbolN<Element>::mapearPadres(map<Element, Element>& mapa){
+    mapa.clear();
+    mapearPadresAux(raiz, mapa);
+}
+
+template <class Element>
+void ArbolN<Element>::mapearHijos(map<Element, list<Element> >& mapa){
+    mapa.clear();
+    mapearHijosAux(raiz, mapa);
+}
+
+template <class Element>
 void ArbolN<Element>::llenarPadresHijos(list<Element> padres, list<Element> hijos){
     vaciar();
     
-    // Si la entrada viene completamente vacía
     if(padres.empty() && hijos.empty()){
         return;
     }
 
-    // Si solo hay una relación o el primer padre es único y no tiene hijos en la lista
     Element datoRaiz = padres.front();
     raiz = new NodoN<Element>(datoRaiz, NULL, NULL);
     peso = 1;
 
     if(hijos.empty()){
-        return; // Caso de un árbol de 1 solo nodo (solo raíz)
+        return; 
     }
 
     map<Element, NodoN<Element>* > nodos;

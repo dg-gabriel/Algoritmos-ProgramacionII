@@ -54,6 +54,7 @@ class ArbolBin{
         list<Element> preOrden();                                               // O(n), retorna una lista en recorrido preOrden
         list<Element> inOrden();                                                // O(n), retorna una lista en recorrido inOrden
         list<Element> postOrden();                                              // O(n), retorna una lista en recorrido postOrden
+        list<list<Element> > recorridoPorNiveles();                     // O(n), retorna una lista de listas, donde cada posicion es un nivel del arbol
         void llenarPreIn(list<Element> preOrden,list<Element> inOrden);         // O(n) ambos, reconstruyen el arbol a partir de
         void llenarPostIn(list<Element> postOrden,list<Element> inOrden);       // dos recorridos almacenados en lista: inorden, pre/post orden
         void imprimirArbol();                                                   // O(n), imprime visualmente el arbol para depurar
@@ -359,6 +360,36 @@ template <class Element>
 list<Element> ArbolBin<Element>::postOrden(){
     list<Element> resultado;
     postOrdenAux(raiz, resultado);
+    return resultado;
+}
+
+template <class Element>
+list<list<Element> > ArbolBin<Element>::recorridoPorNiveles(){
+    list<list<Element> > resultado;
+    if (raiz == NULL) return resultado;
+
+    queue<NodoBin<Element>*> cola;
+    cola.push(raiz);
+
+    while(!cola.empty()){
+        int len = cola.size();
+        list<Element> nivelActual;
+
+        for(int i = 0; i < len; i++){
+            NodoBin<Element>* actual = cola.front();
+            cola.pop();
+
+            nivelActual.push_back(actual->getInfo());
+
+            if(actual.>getHijoIzq()){
+                cola.push(actual->getHijoIzq());
+            }
+            if(actual->getHijoDer()){
+                cola.push(actual->getHijoDer());
+            }
+        }
+        resultado.push_back(nivelActual);
+    }
     return resultado;
 }
 

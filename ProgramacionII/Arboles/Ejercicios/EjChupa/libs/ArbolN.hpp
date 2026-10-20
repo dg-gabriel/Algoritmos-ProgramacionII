@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <list>
+#include <queue>
 #include <string>
 #include <map>
 #include <algorithm>
@@ -47,6 +48,7 @@ class ArbolN{
         list<Element> preOrden();                                               // O(n), recorrido en preorden
         list<Element> inOrden();                                                // O(n), recorrido en inorden
         list<Element> postOrden();                                              // O(n), recorrido en postorden
+        list<list<Element> > recorridoPorNiveles();                             // O(n), retorna una lista de listas, donde cada posicion es un nivel del arbol
         void imprimirArbol();                                                   // O(n), visualizacion del arbol para depurar
         void mapearNiveles(map<Element, int>& mapa);                            // O(n), llena un mapa con el nivel de cada nodo
         void mapearPadres(map<Element, Element>& mapa);                         // O(n), llena un mapa con el padre de cada nodo
@@ -420,6 +422,35 @@ template <class Element>
 list<Element> ArbolN<Element>::postOrden(){
     list<Element> resultado;
     postOrdenAux(raiz, resultado);
+    return resultado;
+}
+
+template <class Element>
+list<list<Element> > ArbolN<Element>::recorridoPorNiveles(){
+    list<list<Element> > resultado;
+    if (raiz == NULL) return resultado;
+
+    queue<NodoN<Element>*> cola;
+    cola.push(raiz);
+
+    while (!cola.empty()) {
+        int len = cola.size(); 
+        list<Element> nivelActual;
+
+        for (int i = 0; i < len; i++) {
+            NodoN<Element>* actual = cola.front();
+            cola.pop();
+
+            nivelActual.push_back(actual->getInfo());
+
+            NodoN<Element>* hijo = actual->getHijoIzq();
+            while (hijo != NULL) {
+                cola.push(hijo);
+                hijo = hijo->getHermanoDer();
+            }
+        }
+        resultado.push_back(nivelActual); 
+    }
     return resultado;
 }
 

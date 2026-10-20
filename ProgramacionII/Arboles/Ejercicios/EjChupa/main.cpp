@@ -28,6 +28,8 @@ int calcularMSI(map<int,int> &niveles,vector<int> &values){
     int maxMSI = 0;
     map<int,list<int> > mapaInvertido;
 
+    // invertimos el mapa para que dado un nivel, retorne la lista de nodos de ese nivel
+    
     for(map<int, int>::iterator it = niveles.begin(); it != niveles.end(); ++it){
         int nivelDelNodo = it->second;  
         int valorNodo = it->first;   

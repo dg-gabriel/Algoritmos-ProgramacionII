@@ -115,9 +115,9 @@ int main(){
 
     cin >> nCasos;
     for(int i=0;i<nCasos;i++){
-        int maxSum = -1;
+        int maxSum = -1,familiaMax = 0;
         cin >> nFamilias;
-        for(int j=0;j<nFamilias;j++){
+        for(int j=1;j<=nFamilias;j++){
             cin >> nNodos;
             ArbolBin<int> arbol;
             list<int> conjQ;
@@ -126,9 +126,10 @@ int main(){
             sum = obtenerValorFamilia(arbol,conjQ);
             if(sum > maxSum){
                 maxSum = sum;
+                familiaMax = j;
             }
         }
-        cout << maxSum << endl;
+        cout << familiaMax << endl;
     }
 }
 

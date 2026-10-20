@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <map>
 #include <algorithm>
 #include "NodoBin.hpp"
 
@@ -22,16 +23,27 @@ class ArbolBin{
         void preOrdenAux(NodoBin<Element> *ptr,list<Element>& lista);          // auxiliar para recorrido preorden
         void inOrdenAux(NodoBin<Element> *ptr,list<Element>& lista);           // auxiliar para recorrido inorden
         void postOrdenAux(NodoBin<Element> *ptr,list<Element>& lista);         // auxiliar para recorrido postorden
-        NodoBin<Element>* construirPreInAux(list<Element>& preOrden,list<Element>& inOrden,bool tieneLimite,Element limite,int& contadorPeso);
-        NodoBin<Element>* construirPostInAux(list<Element>& postOrden,list<Element>& inOrden,bool tieneLimite,Element limite,int& contadorPeso);
+        // auxiliares para construir el arbol a partir de recorridos
+        NodoBin<Element>* construirPreInAux(list<Element>& preOrden,           
+                            list<Element>& inOrden,bool tieneLimite,           
+                            Element limite,int& contadorPeso);                 
+        NodoBin<Element>* construirPostInAux(list<Element>& postOrden,
+                            list<Element>& inOrden,bool tieneLimite,
+                            Element limite,int& contadorPeso);
+        // auxiliar para imprimir el arbol para debuggeo
         void imprimirArbolAux(NodoBin<Element> *nodo,string prefijo,bool esUltimo);
+        // auxiliares para mapear el arbol
+        void mapearNivelesAux(NodoBin<Element>* ptr, int nivelActual, map<Element, int>& mapa);
+        void mapearPadresAux(NodoBin<Element>* ptr, map<Element, Element>& mapa);
+        void mapearHijosAux(NodoBin<Element>* ptr, map<Element, list<Element> >& mapa);
 
     public:
         ArbolBin();                                                             // O(1), constructor
         ArbolBin(const ArbolBin<Element>& target);                              // O(n), constructor copia
         ~ArbolBin();                                                            // O(n), destructor
         ArbolBin<Element>& operator=(const ArbolBin<Element>& target);          // O(n), sobrecarga del op. de asignacion
-        void construir(Element e,ArbolBin<Element> &a1,ArbolBin<Element> &a2);  // O(n), constructor de ensamblaje
+        void construir(Element e,ArbolBin<Element> const &a1,                   // O(n), constructor de ensamblaje
+                                 ArbolBin<Element> const &a2);                   
         void copiar(ArbolBin<Element> &target);                                 // O(n), copia la instancia al target
         bool esNulo();                                                          // O(1), true si es vacio, false si no
         Element getRaiz();                                                      // O(1), retorna la raiz
@@ -45,6 +57,9 @@ class ArbolBin{
         void llenarPreIn(list<Element> preOrden,list<Element> inOrden);         // O(n) ambos, reconstruyen el arbol a partir de
         void llenarPostIn(list<Element> postOrden,list<Element> inOrden);       // dos recorridos almacenados en lista: inorden, pre/post orden
         void imprimirArbol();                                                   // O(n), imprime visualmente el arbol para depurar
+        void mapearNiveles(map<Element, int>& mapa);                            // O(n), llena un mapa con el nivel de cada nodo
+        void mapearPadres(map<Element, Element>& mapa);                         // O(n), llena un mapa con el padre de cada nodo
+        void mapearHijos(map<Element, list<Element> >& mapa);                   // O(n), llena un mapa con los hijos de cada nodo (trivial en binarios)
         void vaciar();                                                          // O(n), vacia el arbol
 };
 
@@ -192,6 +207,52 @@ void ArbolBin<Element>::imprimirArbolAux(NodoBin<Element>* nodo,string prefijo,b
 }
 
 template <class Element>
+void ArbolBin<Element>::mapearNivelesAux(NodoBin<Element>* ptr, int nivelActual, map<Element, int>& mapa){
+    if(!ptr){
+        return;
+    }
+    mapa[ptr->getInfo()] = nivelActual;
+    mapearNivelesAux(ptr->getHijoIzq(), nivelActual + 1, mapa);
+    mapearNivelesAux(ptr->getHijoDer(), nivelActual + 1, mapa);
+}
+
+template <class Element>
+void ArbolBin<Element>::mapearPadresAux(NodoBin<Element>* ptr, map<Element, Element>& mapa){
+    if(!ptr){
+        return;
+    }
+    if(ptr->getHijoIzq() != NULL){
+        mapa[ptr->getHijoIzq()->getInfo()] = ptr->getInfo();
+        mapearPadresAux(ptr->getHijoIzq(), mapa);
+    }
+    if(ptr->getHijoDer() != NULL){
+        mapa[ptr->getHijoDer()->getInfo()] = ptr->getInfo();
+        mapearPadresAux(ptr->getHijoDer(), mapa);
+    }
+}
+
+template <class Element>
+void ArbolBin<Element>::mapearHijosAux(NodoBin<Element>* ptr, map<Element, list<Element> >& mapa){
+    if(!ptr){
+        return;
+    }
+    
+    if(mapa.find(ptr->getInfo()) == mapa.end()){
+        mapa[ptr->getInfo()] = list<Element>(); 
+    }
+
+    if(ptr->getHijoIzq() != NULL){
+        mapa[ptr->getInfo()].push_back(ptr->getHijoIzq()->getInfo());
+        mapearHijosAux(ptr->getHijoIzq(), mapa);
+    }
+    
+    if(ptr->getHijoDer() != NULL){
+        mapa[ptr->getInfo()].push_back(ptr->getHijoDer()->getInfo());
+        mapearHijosAux(ptr->getHijoDer(), mapa);
+    }
+}
+
+template <class Element>
 ArbolBin<Element>::ArbolBin(){
     raiz = NULL;
     peso = 0;
@@ -219,9 +280,8 @@ ArbolBin<Element>& ArbolBin<Element>::operator=(const ArbolBin<Element>& target)
     return *this;
 }
 
-// Corrección 3: Copia a1 y a2 primero, calcula el peso, vacía la raíz vieja y asigna
 template <class Element>
-void ArbolBin<Element>::construir(Element e, ArbolBin<Element> &a1, ArbolBin<Element> &a2){
+void ArbolBin<Element>::construir(Element e, const ArbolBin<Element> &a1, const ArbolBin<Element> &a2){
     NodoBin<Element>* izq = copiarNodos(a1.raiz);
     NodoBin<Element>* der = copiarNodos(a2.raiz);
     int nuevoPeso = a1.peso + a2.peso + 1;
@@ -329,6 +389,24 @@ void ArbolBin<Element>::imprimirArbol(){
 
     imprimirArbolAux(raiz->getHijoIzq(),"",raiz->getHijoDer() == NULL);
     imprimirArbolAux(raiz->getHijoDer(),"",true);
+}
+
+template <class Element>
+void ArbolBin<Element>::mapearNiveles(map<Element, int>& mapa){
+    mapa.clear(); 
+    mapearNivelesAux(raiz, 0, mapa); 
+}
+
+template <class Element>
+void ArbolBin<Element>::mapearPadres(map<Element, Element>& mapa){
+    mapa.clear();
+    mapearPadresAux(raiz, mapa); 
+}
+
+template <class Element>
+void ArbolBin<Element>::mapearHijos(map<Element, list<Element> >& mapa){
+    mapa.clear();
+    mapearHijosAux(raiz, mapa);
 }
 
 template <class Element>
