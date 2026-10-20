@@ -1,3 +1,5 @@
+// convierte un mapa de nombre -> nivel en un mapa de
+//                      nivel -> nombre
 #include <iostream>
 #include <list>
 #include "ArbolBin.hpp"

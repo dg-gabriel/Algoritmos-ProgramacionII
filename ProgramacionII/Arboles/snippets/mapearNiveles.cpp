@@ -1,3 +1,4 @@
+// ya lo añadi a la clase asi que no sirve de mucho aca
 #include <iostream>
 #include <map>
 #include "ArbolN.hpp"

@@ -1,4 +1,5 @@
-
+// resuelve el ejercicio de base de defensa
+// utilizando un vector como lista de adyacencia
 #include <iostream>
 #include <list>
 #include <vector>
@@ -57,7 +58,7 @@ int main(){
         
         leerEntrada(arbol, values, hijosRapidos, nNodos);
         
-        // La raíz siempre es 1 según el enunciado que me pasaste antes
+        // La raíz siempre es 1 
         int alcance = obtenerEstabilidad(1, hijosRapidos, values, 0) + 1;
         
         (alcance < 0) ? cout << 0 : cout << alcance;
