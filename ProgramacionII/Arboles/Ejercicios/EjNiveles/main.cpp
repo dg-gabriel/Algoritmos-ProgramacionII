@@ -1,3 +1,7 @@
+// Ej. Parcial 2013
+// "Niveles"
+// es trivial con el metodo recorridoPorNiveles()
+// solo es imprimir los niveles entre n y m incluyendoles
 #include <iostream>
 #include "ArbolBin.hpp"
 #include <list>
