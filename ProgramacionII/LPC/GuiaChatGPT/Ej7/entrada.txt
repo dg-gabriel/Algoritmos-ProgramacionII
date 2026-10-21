@@ -1,0 +1,9 @@
+1
+4
+6
+Aldor 45 18
+Brann 62 11
+Cedric 51 25
+Elian 38 7
+Freya 70 30
+Garen 56 15

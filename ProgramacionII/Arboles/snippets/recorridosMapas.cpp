@@ -50,3 +50,36 @@ void inOrdenMapa(int u, map<int, list<int> > &mapaHijos) {
         inOrdenMapa(*it, mapaHijos);
     }
 }
+
+//  buscar el camino entre dos nodos
+bool buscarCamino(string u, string destino, map<string, list<string> > &hijos, list<string> &camino) {
+    camino.push_back(u);
+    if (u == destino) return true;
+
+    list<string> &misHijos = hijos[u];
+    for (list<string>::iterator it = misHijos.begin(); it != misHijos.end(); ++it) {
+        if (buscarCamino(*it, destino, hijos, camino)) {
+            return true;
+        }
+    }
+
+    camino.pop_back(); // No estaba por esta rama, retrocedemos
+    return false;
+}
+
+
+// Ejemplo: Contar hojas (o sumar pesos) que cuelgan de 'u'
+int acumularSubarbol(string u, map<string, list<string> > &hijos) {
+    list<string> &misHijos = hijos[u];
+
+    // Si la lista de hijos está vacía, 'u' es una HOJA
+    if (misHijos.empty()) {
+        return 1; // Caso base de hoja
+    }
+
+    int suma = 0; // (O pon suma = valor[u] si también quieres sumar a los padres)
+    for (list<string>::iterator it = misHijos.begin(); it != misHijos.end(); ++it) {
+        suma += acumularSubarbol(*it, hijos);
+    }
+    return suma;
+}

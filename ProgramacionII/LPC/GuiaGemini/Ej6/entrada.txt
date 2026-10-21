@@ -1,0 +1,3 @@
+1
+3
+[A:Guerrero:10]-[B:Mago:15] -[C:Picaro:20] [D:Guerrero:30] -[E:Mago:12]

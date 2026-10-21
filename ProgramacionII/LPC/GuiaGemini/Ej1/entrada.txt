@@ -1,0 +1,10 @@
+3
+2
+Harkonnen:especia,agua,metal;Atreides:escudos,especia
+Corrino:especia,especia
+3
+Fremen:cuchillo,agua
+Keifleen:esmeralda,cobre,patacon,especia,especia;Weighlmer:granzon,curry,especia,algodon;Junior:malta
+Malidus:espada,malla,hierba,especia,especia,especia,especia
+1
+Markus:kefir;Kane:hongos,baterias;Stauchking:polvora,cartuchos,arenisca,dianas;O'Marge:naranjas,vidrio,fertilizante

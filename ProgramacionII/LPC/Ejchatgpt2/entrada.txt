@@ -1,0 +1,10 @@
+2
+Juan,3
+Maria,8
+Pedro,5
+Ana,5
+Luis,9
+FIN
+Carlos,10
+Sofia,1
+FIN
