@@ -55,7 +55,7 @@ class ArbolBin{
         list<Element> preOrden();                                               // O(n), retorna una lista en recorrido preOrden
         list<Element> inOrden();                                                // O(n), retorna una lista en recorrido inOrden
         list<Element> postOrden();                                              // O(n), retorna una lista en recorrido postOrden
-        list<list<Element> > recorridoPorNiveles();                     // O(n), retorna una lista de listas, donde cada posicion es un nivel del arbol
+        list<list<Element> > recorridoPorNiveles();                             // O(n), retorna una lista de listas, donde cada posicion es un nivel del arbol
         void llenarPreIn(list<Element> preOrden,list<Element> inOrden);         // O(n) ambos, reconstruyen el arbol a partir de
         void llenarPostIn(list<Element> postOrden,list<Element> inOrden);       // dos recorridos almacenados en lista: inorden, pre/post orden
         void imprimirArbol();                                                   // O(n), imprime visualmente el arbol para depurar

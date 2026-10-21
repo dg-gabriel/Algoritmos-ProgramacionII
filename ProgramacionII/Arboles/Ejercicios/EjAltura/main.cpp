@@ -12,7 +12,6 @@ void leerEntrada(ArbolBin<char> &arbol,int &n,int &m){
     stringstream ss;
     int nNodos;
     cin >> nNodos >> n >> m;
-    cout << nNodos << n << m << endl;
     for(int i=0;i<2;i++){
         getline(cin >> ws,line);
         ss.clear();
@@ -38,6 +37,22 @@ void leerEntrada(ArbolBin<char> &arbol,int &n,int &m){
     }
 }
 
+void imprimirNiveles(ArbolBin<char> &a,int n,int m){
+    list<list<char> > rec = a.recorridoPorNiveles();
+    for(int i=0;i<n;i++){
+        rec.pop_front();
+    }
+    for(int i=n;i<=m;i++){
+        list<char> niv = rec.front();
+        for(list<char>::iterator it = niv.begin();it != niv.end();++it){
+            cout << *it << " ";
+        }
+        rec.pop_front();
+    }
+    
+    cout << endl;
+}
+
 int main(){
     int nCasos;
     cin >> nCasos;
@@ -45,6 +60,7 @@ int main(){
         ArbolBin<char> arbol;
         int n,m;
         leerEntrada(arbol,n,m);
-        arbol.imprimirArbol();
+        cout << "Caso #" << i+1 << " ";
+        imprimirNiveles(arbol,n,m);
     }
 }
