@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <list>
+#include <queue>
 #include <string>
 #include <map>
 #include <algorithm>
@@ -381,7 +382,7 @@ list<list<Element> > ArbolBin<Element>::recorridoPorNiveles(){
 
             nivelActual.push_back(actual->getInfo());
 
-            if(actual.>getHijoIzq()){
+            if(actual->getHijoIzq()){
                 cola.push(actual->getHijoIzq());
             }
             if(actual->getHijoDer()){

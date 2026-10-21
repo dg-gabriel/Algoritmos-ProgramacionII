@@ -1,0 +1,7 @@
+2
+PREORDEN alvaro-N marian-M vero-M
+INORDEN marian-M alvaro-N vero-M
+marian-M vero-M
+POSTORDEN manu-M maxi-M giuli-N
+INORDEN manu-M giuli-N maxi-M
+giuli-N manu-M
