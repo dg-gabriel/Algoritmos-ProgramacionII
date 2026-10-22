@@ -26,7 +26,6 @@ bool esCompleto(map<char,list<char> >&hijos,map<char,int> &niveles,bool &esLLeno
     for(map<char,list<char> >::iterator it = hijos.begin();it != hijos.end();++it){
         if(!(it->second.empty())){
             if(it->second.size() < 2){
-                cout << "sale falso" << endl;
                 return false;
             }
         }

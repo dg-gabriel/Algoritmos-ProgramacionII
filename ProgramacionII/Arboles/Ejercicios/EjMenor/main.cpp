@@ -52,7 +52,7 @@ bool aMenorQueB(ArbolBin<int> &a,ArbolBin<int> &b){
             menorB = *it;
         }
     }
-    return (mayorA < menorB) ? true : false; 
+    return mayorA < menorB; 
 }
 
 int main(){
