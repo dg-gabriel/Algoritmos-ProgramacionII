@@ -1,8 +1,8 @@
 // Ej. Parcial 2025
 // "CHUPA"
 // semerenda fumada
-// cumple con toda la complejidad pero de vaina usa arboles
-// me apoye de la IA para aprender a usar los mapas
+// de vaina usa arboles
+// no cumple completamente con el enunciado, no da los valores esperados en MSI
 #include <iostream>
 #include <vector>
 #include <list>

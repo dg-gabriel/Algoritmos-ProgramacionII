@@ -93,8 +93,7 @@ int main(){
             list<string> conjunto;
             map<string,int> niveles;
             leerEntrada(arbol,conjunto);
-            mapearNiveles(arbol,niveles,0);
-            int mup = obtenerMUP(arbol,conjunto,niveles);
+            int mup = obtenerMUP(arbol,conjunto);
             if(mup > maxMup){
                 maxMup = mup;
                 arbolMaxMup = j;
