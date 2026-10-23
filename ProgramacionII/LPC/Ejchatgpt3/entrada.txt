@@ -1,0 +1,10 @@
+2
+iniciar sistema <COPY>
+<DEL> hackeo masivo
+<REV> 
+entrar
+FIN
+manzana pera <DEL>
+uva <COPY>
+<REV> <DEL>
+FIN

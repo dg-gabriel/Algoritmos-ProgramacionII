@@ -1,0 +1,4 @@
+3
+<Pion:50>-<Muon:30> | - <Kaon:40><Gluon:80>
+<Gaia:90> -<Duon:20> - | <Cryon:50> <Aeon:40>
+-<Daeon:40> <Meeon:60> - | - <Greephon:40> -<Duruon:40>

@@ -1,0 +1,16 @@
+2
+4
+8
+Aldor,Aprendiz,5
+Brann,Veterano,18
+Cedric,Maestro,27
+Elian,Aprendiz,11
+Freya,Veterano,23
+Garen,Maestro,34
+Helena,Aprendiz,9
+Isolde,Veterano,15
+6
+3
+Marcus,Aprendiz,1
+Mercus,Aprendiz,3
+Morcus,Maestro,30
