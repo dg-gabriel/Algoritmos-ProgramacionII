@@ -43,3 +43,45 @@ begin
 endfunc
 
 
+Dado un grafo no dirigido, determine cuántas componentes conexas existen. Puede apoyarse en BFS o DFS.
+func componentesConexas(Grafo<int>: g): int
+var
+    int: u,v,w,i,nroComp
+    Lista<int>: vertices,vecinos
+    Array[1..N] of bool: visitados
+    Cola<int>: cola 
+begin
+    nroComp <- 0
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- false
+    endfor
+    vertices.construir()
+    vertices <- g.getVertices()
+    while(!vertices.esVacia())do
+        u <- vertices.consultar(1)
+        if(visitados[u])then
+            vertices.eliminar(1)
+        else
+            nroComp <- nroComp + 1
+            visitados[u] <- true
+            cola.construir()
+            cola.encolar(u)
+            while(!cola.esVacia())
+                v <- cola.getHead()
+                vecinos <- g.getVecinos(v)
+                while(!vecinos.esVacia())do
+                    w <- vecinos.consultar(1)
+                    if(!visitados[w])then
+                        visitados[w] <- true
+                        cola.encolar(w)
+                    endif
+                    vecinos.eliminar(1)
+                endwhile
+                cola.desencolar()
+            endwhile
+        endif
+    endwhile
+    return nroComp
+endfunc
+
+
