@@ -30,7 +30,7 @@ ArbolBin<int> construirArbol(int raiz,map<int,list<int> > &hijos){
     return arbolAct;
 }
 
-bool esEspejeado(int u,int v,map<int,list<int> > hijos){
+bool esEspejeado(int u,int v,map<int,list<int> > &hijos){
     // si hijoIzq de u e hijoDer de v son iguales (existen o no existen ambos)
     if((hijos[u].front() != -1 && hijos[v].back() != -1) || (hijos[u].front() == -1 && hijos[v].back() == -1)){
         // si hijoDer de u e hijoIzq de v son iguales (existen o no exsisten ambos)
