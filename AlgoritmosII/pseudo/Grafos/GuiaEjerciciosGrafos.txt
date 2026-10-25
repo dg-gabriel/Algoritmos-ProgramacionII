@@ -27,9 +27,9 @@ var
 begin
     ptr <- instance.primero
     while(ptr)do 
-        if(ptr^.getInfo() = ptrV)then
+        if(ptr^.getInfo() = a)then
             ptrV <- ptr
-        else if(ptr^.getInfo() = ptrW)then
+        else if(ptr^.getInfo() = b)then
                 ptrW <- ptr 
             endif
         endif
@@ -83,5 +83,101 @@ begin
     endwhile
     return nroComp
 endfunc
+
+
+Modele una red social como un grafo no dirigido donde cada nodo representa una persona y cada arista representa una
+amistad.
+
+proc redAmistad::agregarPersona(string: nombre)
+var
+    PointerToNodoVertice<string>: nuevaPersona
+begin
+    nuevaPersona <- new(NodoVertice<string>)
+    nuevaPersona.construir(nombre,instance.primero,NULL)
+    instance.primero <- nuevaPersona
+    nVertices <- nVertices + 1
+endproc
+
+proc redAmistad::agregarAmistad(string: nombre1,nombre2)
+var
+    PointerToNodoArco<string>: arcoU,arcoV
+    PointerToNodoVertice<string>: ptrU,ptrV,ptr
+begin
+    ptrU <- NULL
+    ptrV <- NULL
+    ptr <- instance.primero
+    while(ptr)do
+        if(ptr^.getInfo() = nombre1)
+            ptrU <- ptr 
+        else if(ptr^.getInfo() = nombre2)
+                ptrV <- ptr
+            endif
+        endif
+        ptr <- ptr^.getSiguiente()
+    endwhile
+    if(!ptrU || !ptrV)then
+        return
+    endif
+    arcoU <- new(NodoArco<string>)
+    arcoU^.construir(ptrV,ptrU.^getListaAdy(),0)
+    ptrU^.setListaAdy(arcoU)
+
+    arcoV <- new(NodoArco<string>)
+    arcoV^.construir(ptrU,ptrV^.getListaAdy(),0)
+    ptrV^.setListaAdy(arcoV)
+
+endproc
+
+func nivelDeConexion(string: persona1,persona2): int
+var
+    int: nivelAct
+    Cola<PointerToNodoVertice<string>>: colaNodos
+    Cola<int>: colaNiveles
+    Lista<string>: visitados
+    PointerToNodoVertice<string>: actual,destino,ptrA
+    PointerToNodoArco<string>: arco
+begin
+    ptrA <- NULL
+    actual <- instance.first
+    while(ptr)do
+        if(ptr^.getInfo() = persona1)then
+            ptrA <- ptr 
+        endif
+        ptr <- ptr^.getSiguiente()
+    endwhile
+    if(!ptrA)then
+        return nivel 
+    endif
+    colaNodos.construir()
+    colaNiveles.construir()
+    visitados.construir()
+    colaNodos.encolar(ptrA)
+    colaNiveles.encolar(0)
+    visitados.insertar(ptrA^.getInfo(),1)
+    while(!colaNodos.esVacia())do
+        actual <- colaNodos.getHead()
+        nivelAct <- colaNiveles.getHead()
+        if(actual^.getInfo() = persona2)then
+            return nivelAct
+        endif
+        arco <- actual.getListaAdy()
+        while(arco)do
+            destino <- arco^.getInfo()
+            if(!visitados.buscar(destino^.getInfo()))then
+                visitados.insertar(destino^.getInfo(),1)
+                colaNodos.encolar(destino)
+                colaNiveles.encolar(nivelAct+1)
+            endif
+            arco <- arco^.getSiguiente()
+            // asi se recorren vertices adyacentes con punteros
+        endwhile
+        colaNodos.desencolar()
+        colaNiveles.desencolar()
+    endwhile
+    return -1
+endfunc
+
+
+
 
 

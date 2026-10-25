@@ -6,8 +6,11 @@ Attributes:
         PointerToNodoArco<Element>: listaAdy
     Methods:
     proc construir(Element: info,PointerToNodoVertice<Element>: sig,PointerToNodoArco<Element>: listaAdy)
-    .
-    .
+    func getInfo(): Element
+    func getSiguiente(): PointerToNodoVertice<Element>
+    func getListaAdy(): PointerToNodoArco<Element>
+    proc setInfo(Element: e)
+    proc setSiguiente(PointerToNodoVertice<Element>: sig)
     .
 endclass
 
