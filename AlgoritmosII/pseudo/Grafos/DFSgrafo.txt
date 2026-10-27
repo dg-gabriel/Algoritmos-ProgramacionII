@@ -29,3 +29,49 @@ begin
         vecinos.eliminar(1)
     endwhile
 endproc
+
+
+
+// version iterativa
+
+func DFS(Grafo<Element>: g, Element: target): Lista<Element>
+var
+    Array[1..N] of bool: visitados
+    Lista<Element>: result, vecinos
+    Pila<Element>: pila
+    int: i, n
+    Element: v, w
+begin
+    result.construir()
+    pila.construir()
+    vecinos.construir()
+    n <- g.getNVertices()
+
+    for i <- 1 to n do
+        visitados[i] <- false
+    endfor
+    
+    pila.apilar(target)
+    
+    while (¬pila.esVacia()) do
+        v <- pila.getTop()
+        pila.desapilar()
+        
+        if (¬visitados[v]) then
+            visitados[v] <- true
+            result.insertar(v, result.getLength() + 1)
+            
+            vecinos <- g.getVecinos(v)
+            
+            while (¬vecinos.esVacia()) do
+                w <- vecinos.consultar(1)
+                if (¬visitados[w]) then
+                    pila.apilar(w)
+                endif
+                vecinos.eliminar(1)
+            endwhile
+        endif
+    endwhile
+    
+    return result
+endfunc
