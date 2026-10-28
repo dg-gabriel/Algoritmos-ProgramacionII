@@ -177,7 +177,246 @@ begin
     return -1
 endfunc
 
+Modele el sistema de materias de una universidad como un grafo dirigido, donde una arista A → B indica que A es
+prerrequisito de B.
+
+proc SistemaMaterias::agregarMateria(string: materia)
+var
+    PointerToNodoVertice<string>: nuevaMat
+begin
+    nuevaMat <- new(NodoVertice<string>)
+    nuevaMat^.construir(nombre,instance.primero,NULL)
+    instance.primero <- nuevaMat
+    nVertices <- nVertices + 1
+endproc
+
+proc SistemaMaterias::agregarPrerequisito(string: a,b)
+var
+    PointerToNodoVertice<string>: ptrA,ptrB,act
+    PointerToNodoArco<string>: prelacion
+begin
+    ptrA <- NULL
+    ptrB <- NULL
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = a)then
+            ptrA <- act
+        else if(act^.getInfo() = b)then 
+                ptrB <- act
+            endif
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(!ptrA || !ptrB)then
+        return
+    endif
+    prelacion <- new(NodoArco<string>)
+    prelacion^.construir(ptrB,ptrA^.getListaAdy(),0)
+    ptrA.setListaAdy(prelacion)
+endproc
+
+func SistemaMaterias::puedeInscribirse(string: materia, Lista<string>: aprobadas): bool
+var
+    PointerToNodoArco<string>: arcoAct
+    PointerToNodoVertice<string>: act // Faltó el <string> en tu declaración
+    bool: requisitoAprobado
+    int: i
+begin
+    act <- instance.primero
+    while (act) do
+        arcoAct <- act^.getListaAdy()
+        
+        while (arcoAct) do
+            if (arcoAct^.getInfo() = materia) then
+                requisitoAprobado <- false
+                for i <- 1 to aprobadas.getLength() do
+                    if (aprobadas.consultarPos(i) = act^.getInfo()) then
+                        requisitoAprobado <- true
+                    endif
+                endfor
+                
+                if (¬requisitoAprobado) then
+                    return false
+                endif
+            endif
+            arcoAct <- arcoAct^.getSiguiente()
+        endwhile
+        
+        act <- act^.getSiguiente()
+    endwhile
+    return true
+endfunc
 
 
+Dado un grafo dirigido, determine si existe algún ciclo en el grafo utilizando DFS. Considere el estado de cada nodo
+durante el recorrido.
+
+// se asume grafo mapeado
+func tieneCiclo(Grafo<Element>: g): bool
+var
+    Array[1..N] of int: estado
+    int: i, n
+begin
+    n <- g.getVertices()
+    for i <- 1 to n do
+        estado[i] <- 0
+    endfor
+    for i <- 1 to n do
+        if(!estado[i])then 
+            if(tieneCiclo(g,i,estado))then
+                return true
+            endif
+        endif
+    endfor
+    return false
+endfunc 
+
+func tieneCiclo(Grafo<Element>: g,int: u,ref: Array[1..n] of int: estado): bool
+var
+    Array[1..N] of bool: visitados
+    Lista<Element>: vecinos
+    Pila<Element>: pila
+    int: i, n
+    Element: v
+begin
+    pila.construir()
+    pila.apilar(u)
+    while(¬pila.esVacia())do
+        v <- pila.getTop()
+        if(estado[v] = 0)then
+            estado[v] <- 1     
+            vecinos <- g.getVecinos(v)     
+            while(¬vecinos.esVacia())do
+                w <- vecinos.consultar(1)
+                if(estado[w] = 1)then
+                    return true
+                else if(estadp[w] = 0)then
+                    pila.apilar(w)
+                endif
+                vecinos.eliminar(1)
+            endwhile
+        else if(estado[v] = 1)then
+                estado[v] = 2
+                pila.desapilar()
+            else
+                pila.desapilar()
+            endif    
+        endif
+    endwhile
+    return false
+endfunc 
+
+Modele un sistema de recomendación como un grafo no dirigido donde los nodos son productos y las aristas indican que
+dos productos suelen comprarse juntos.
+
+// se asume Producto como su propio tipo de dato
+
+proc SistemaRecomendacion::agregarProducto(Producto: p)
+var
+    PointerToNodoVertice<Producto>: nuevoProd
+begin
+    nuevoProd <- new(NodoVertice<Producto>)
+    nuevoProd^.construir(p,instance.primero,NULL)
+    instance.primero <- nuevoProd
+    nVertices <- nVertices + 1
+endproc
+
+proc SistemaRecomendacion::agregarRelacion(Producto: p1,p2)
+var
+    PointerToNodoVertice<Producto> ptr1,ptr2,act
+    PointerToNodoArco<Producto>: arco1,arco2
+
+begin
+    ptr1 <- NULL
+    ptr2 <- NULL
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = p1)then
+            ptr1 <- act
+        else if(act^.getInfo() = p2)then
+                ptr2 <- act 
+            endif
+        endif
+        act <- act.getSiguiente()
+    endwhile
+    if(!ptr1 || !ptr2)then
+        return
+    endif
+
+    arco1 <- new(NodoArco<Producto>)
+    arco1^.construir(ptr1,ptr2^.getListaAdy(),0)
+    ptr1^.setListaAdy(arco1)
+
+    arco2 <- new(NodoArco<Producto>)
+    arco2^.construir(ptr2,ptr1^.getListaAdy(),0)
+    ptr2^.setListaAdy(arco2)
+endproc
+
+func SistemaRecomendacion::recomendar(Producto: p): Lista<Producto>
+var
+    Lista<Producto>: result
+    PointerToNodoVertice<Producto>: prod,act
+    PointerToNodoArco<Producto>: adyacentes
+begin
+    result.construir()
+    prod <- NULL
+    adyacentes <- NULL
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = p)then
+            prod <- act
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(prod)then
+        adyacentes <- prod^.getListaAdy()
+    endif
+    while(adyacentes)do
+        result.insertar(adyacentes^.getInfo(),result.getLength()+1)
+        adyacentes <- adyacentes^.getSiguiente()
+    endwhile
+    return result
+endfunc
+
+// se asume un mapeo del grafo
+func SistemaRecomendacion::recomendarExtendido(Producto: p): Lista<Producto>
+var
+    PointerToNodoVertice<Producto>: actual,ptrP
+    PointerToNodoArco<Producto>: arcoAct
+    Cola<PointerToNodoVertice<Producto>>: nivel1,nivel2
+    Lista<Producto>: result
+begin
+    ptrP <- NULL
+    result.construir()
+    actual <- instance.primero
+    while(actual)do
+        if(actual^.getInfo() = p)then
+            ptrP <- actual
+            break
+        endif
+        actual <- actual^.getSiguiente()
+    endwhile
+    if(!actual)then
+        return result
+    endif
+    nivel1.construir()
+    arcoAct <- ptrP^.getListaAdy()
+    while(arcoAct)do
+        nivel1.encolar(arcoAct^.getInfo())
+        result.insertar(arcoAct^.getInfo()^.getInfo(),result.getLength()+1)
+        arcoAct <- arcoAct^.getSiguiente()
+    endwhile
+    while(!nivel1.esVacia())do
+        arcoAct <- nivel1.getHead()^.getListaAdy()
+        nivel1.desencolar()
+        while(arcoAct)do
+            if(!(result.contiene(arcoAct^.getInfo()^.getInfo())))then
+                result.insertar(arcoAct^.getInfo()^.getInfo())
+            endif
+            arcoAct <- arcoAct^getSiguiente()
+        endwhile
+    endwhile
+    return result
+endfunc
 
 

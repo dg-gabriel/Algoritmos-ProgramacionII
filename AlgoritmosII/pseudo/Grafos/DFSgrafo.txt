@@ -29,3 +29,52 @@ begin
         vecinos.eliminar(1)
     endwhile
 endproc
+
+
+func DFS_Iterativo(Grafo<Element>: g, Element: target): Lista<Element>
+var
+    Array[1..N] of bool: visitados
+    Lista<Element>: result, vecinos
+    Pila<Element>: pila
+    int: i, n
+    Element: v, w
+begin
+    result.construir()
+    pila.construir()
+    vecinos.construir()
+    n <- g.getNVertices()
+    
+    // 1. Inicialización
+    for i <- 1 to n do
+        visitados[i] <- false
+    endfor
+    
+    // 2. Apilamos el nodo inicial
+    pila.apilar(target)
+    
+    // 3. Ciclo principal
+    while (¬pila.esVacia()) do
+        v <- pila.getTop() // Obtenemos el tope (sin desapilar aún)
+        pila.desapilar()
+        
+        // ¡OJO! Solo procesamos si NO ha sido visitado antes
+        if (¬visitados[v]) then
+            visitados[v] <- true
+            result.insertar(v, result.getLength() + 1)
+            
+            // Obtenemos los vecinos
+            vecinos <- g.getVecinos(v)
+            
+            // Apilamos todos los vecinos no visitados
+            while (¬vecinos.esVacia()) do
+                w <- vecinos.consultar(1)
+                if (¬visitados[w]) then
+                    pila.apilar(w)
+                endif
+                vecinos.eliminar(1)
+            endwhile
+        endif
+    endwhile
+    
+    return result
+endfunc
