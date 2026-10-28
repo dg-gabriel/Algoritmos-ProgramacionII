@@ -247,6 +247,114 @@ begin
     return true
 endfunc
 
+Modele el sistema de materias de una universidad como un grafo dirigido, donde una arista A → B indica que A es
+prerrequisito de B
+
+proc SistemaMaterias::agregarMateria(string: materia)
+var
+    PointerToNodoVertice<string>: nuevaMat
+begin
+    nuevaMat <- new(NodoVertice<string>)
+    nuevaMat^.construir(nombre,instance.primero,NULL)
+    instance.primero <- nuevaMat
+    nVertices <- nVertices + 1
+endproc
+
+proc SistemaMaterias::agregarPrerequisito(string: a,b)
+var
+    PointerToNodoVertice<string>: ptrA,ptrB,act
+    PointerToNodoArco<string>: prelacion
+begin
+    ptrA <- NULL
+    ptrB <- NULL
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = a)then
+            ptrA <- act
+        else if(act^.getInfo() = b)then 
+                ptrB <- act
+            endif
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(!ptrA || !ptrB)then
+        return
+    endif
+    prelacion <- new(NodoArco<string>)
+    prelacion^.construir(ptrB,ptrA^.getListaAdy(),0)
+    ptrA.setListaAdy(prelacion)
+endproc
+
+func puedeInscribirse(string: materia,Lista<string>: aprobadas): bool
+var
+    PointerToNodoArco<string>: arcoAct
+    PointerToNodoVertice: act
+    bool: requisito
+begin
+    act <- instance.first
+    while(act)do
+        arcoAct <- act^.getListaAdy()
+        while(arcoAct)do
+            if(arcoAct^.getInfo() = materia)
+                requisito <- false
+                if(aprobadas.contiene(act^.getInfo()))then
+                    // aprobo la prelacion inmediata
+                    requisito <- true
+                endif
+                if(!requisito)then
+                    return false
+                endif
+            endif
+            arcoAct <- arcoAct^.getSiguiente()
+        endwhile
+        act <- act^.getSiguiente()
+    endwhile
+    return true
+endfunc
+
+Dado un grafo dirigido, determine si existe algún ciclo en el grafo utilizando DFS. Considere el estado de cada nodo
+durante el recorrido
+
+func tieneCiclo(Grafo<Element>: g): bool
+var
+    Array[1..N] of bool: visitados
+    Lista<Element>: vecinos
+    Pila<Element>: pila
+    int: i, n
+    Element: v
+begin
+    result.construir()
+    pila.construir()
+    n <- g.getNVertices()
+
+    for i <- 1 to n do
+        visitados[i] <- false
+    endfor
+    
+    pila.apilar(g.getPrimero())
+    while(¬pila.esVacia())do
+        v <- pila.getTop()
+        pila.desapilar()
+        
+        if(¬visitados[v])then
+            visitados[v] <- true
+            result.insertar(v, result.getLength() + 1)
+            
+            vecinos <- g.getVecinos(v)
+            
+            while(¬vecinos.esVacia())do
+                pila.apilar(vecinos.consultar(1))
+                vecinos.eliminar(1)
+            endwhile
+        else
+            // si el nodo ya fue visitado en un grafo dirigido, significa que hay ciclo
+            return true
+    endwhile
+    
+    return false
+endfunc
+
+
 
 Dado un grafo dirigido, determine si existe algún ciclo en el grafo utilizando DFS. Considere el estado de cada nodo
 durante el recorrido.
