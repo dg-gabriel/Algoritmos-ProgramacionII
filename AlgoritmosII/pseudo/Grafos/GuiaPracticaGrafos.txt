@@ -1,0 +1,112 @@
+Verificación de existencia de arista
+Dado un grafo no dirigido representado como lista de adyacencia y dos nodos u y v, escribe
+una función que determine si existe una arista directa entre ambos nodos.
+
+bool existeArista(Grafo<Element>: g,Element: u,v)
+begin
+    PointerToNodoVertice<Element>: ptrU
+    PointerToNodoArco<Element>: ptrV
+begin
+    ptrU <- g.primero
+    while(ptrU AND ptrU^.getInfo() != u)do
+        ptrU <- ptrU^.getSiguiente()
+    endwhile
+    if(ptrU)then
+        ptrV <- ptrU^.getListaAdy()
+        while(ptrV)do
+            if(ptrV^.getDestino()^.getInfo() = v)then
+                return true
+            endif
+            ptrV <- ptrV^.getSiguiente()
+        endwhile
+    endif
+    return false
+endfunc
+
+
+Conteo de grado de un nodo
+Dado un grafo no dirigido y un nodo v, implementa una función que calcule y
+retorne el grado del nodo (es decir, la cantidad de aristas que lo conectan con
+otros nodos).
+
+func Grafo<Element>::gradoNodo(Element: v): int
+var
+    PointerToNodoVertice<Element>: ptrV 
+    PointerToNodoArco<Element>: arcosV 
+    int: grado
+begin
+    grado <- 0
+    ptrV <- instance.primero
+    while(ptrV)do
+        if(ptrV^.getInfo() = v)then
+            break
+        endif
+        ptrV <- ptrV^.getSiguiente()
+    endwhile
+    if(ptrV)then
+        arcosV <- ptrV^.getListaAdy()
+        while(arcosV)do
+            grado <- grado + 1
+            arcosV <- arcosV^.getSiguiente()
+        endwhile
+    endif
+    return grado
+endfunc
+
+
+Mapa de rutas entre ciudades
+Modela un mapa de ciudades como un grafo no dirigido con pesos, donde cada
+arista representa una carretera y su peso es la distancia en kilómetros.
+Implementa las siguientes funciones:
+
+agregar_ciudad(nombre) — agrega un nodo.
+proc MapaCiudades::agregar_ciudad(nombre: string)
+
+agregar_ruta(ciudad1, ciudad2, distancia) — agrega una arista con peso.
+proc MapaCiudades::agregar_ruta(ciudad1: string, ciudad2: string, distancia: float)
+
+ciudades_a_menos_de(ciudad_origen, km_maximos) — retorna una lista
+de todas las ciudades que se pueden alcanzar desde la ciudad de origen
+recorriendo como máximo km_maximos kilómetros en una sola ruta directa
+func MapaCiudades::ciudades_a_menos_de(ciudad_origen: string, km_maximos: float): Lista<string>
+
+es_destino_alcanzable(origen, destino) — retorna True si existe al menos un camino
+(sin importar la distancia total) entre ambas ciudades.
+func MapaCiudades::es_destino_alcanzable(origen: string, destino: string): bool
+
+proc MapaCiudades::agregar_ciudad(string: nombre)
+var
+    PointerToNodoVertice<string>: nuevaCiud
+begin
+    nuevaCiud <- new(NodoVertice<string>)
+    nuevaCiud^.construir(nombre,instance.primero,NULL)
+    instance.primero <- nuevaCiud
+endproc
+
+proc MapaCiudades::agregar_ruta(string: ciudad1,ciudad2,float: distancia)
+var
+    PointerToNodoVertice<string>: ptrA,ptrB,actual
+    PointerToNodoArco<string>: arcoA,arcoB
+begin
+    ptrA <- NULL
+    ptrB <- NULL
+    actual <- instance.primero
+    while(actual)do
+        if(actual^.getInfo() = ciudad1)then
+            ptrA <- actual
+        else if(actual^.getInfo() = ciudad2)then
+                ptrB <- actual
+            endif
+        endif
+        actual <- actual^.getSiguiente()
+    endwhile
+    if(ptrA AND ptrB)then
+        arcoA <- new(NodoArco<string>)
+        arcoA^.construir(ptrB,ptrA^.getListaAdy(),distancia)
+        ptrA^.setListaAdy(arcoA)
+
+        arcoB <- new(NodoArco<string>)
+        arcoB^.construir(ptrA,ptrB^.getListaAdy(),distancia)
+        ptrB^.setListaAdy(arcoB)
+    endif
+endproc

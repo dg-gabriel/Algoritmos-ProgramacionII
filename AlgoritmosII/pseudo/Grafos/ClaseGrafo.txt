@@ -17,15 +17,18 @@ endclass
 Class NodoArco<Element>
 Attributes:
     Private:
-        PointerToNodoVertice<Element>: info
+        PointerToNodoVertice<Element>: destino
         PointerToNodoArco<Element>: siguiente
         float: peso
 Methods:
     Public:
-        proc construir(...)
-        .
-        .
-        .
+        proc construir(PointerToNodoVertice<Element>: dest,PointerToNodoArco<Element>: sig,float: peso)
+        PointerToNodoVertice<Element> getDestino()
+        PointerToNodoArco<Element> getSiguiente()
+        float getPeso()
+        void setDestino(PointerToNodoVertice<Element>: v)
+        void setSiguiente(PointerToNodoArco<Element>: w)
+        void setPeso(float: p)
 endclass
 
 Class Grafo<Element>
