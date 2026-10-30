@@ -74,7 +74,7 @@ es_destino_alcanzable(origen, destino) — retorna True si existe al menos un ca
 (sin importar la distancia total) entre ambas ciudades.
 func MapaCiudades::es_destino_alcanzable(origen: string, destino: string): bool
 
-proc MapaCiudades::agregar_ciudad(string: nombre)
+proc MapaCiudades::agregarCiudad(string: nombre)
 var
     PointerToNodoVertice<string>: nuevaCiud
 begin
@@ -83,7 +83,7 @@ begin
     instance.primero <- nuevaCiud
 endproc
 
-proc MapaCiudades::agregar_ruta(string: ciudad1,ciudad2,float: distancia)
+proc MapaCiudades::agregarRuta(string: ciudad1,ciudad2,float: distancia)
 var
     PointerToNodoVertice<string>: ptrA,ptrB,actual
     PointerToNodoArco<string>: arcoA,arcoB
@@ -110,3 +110,52 @@ begin
         ptrB^.setListaAdy(arcoB)
     endif
 endproc
+
+func MapaCiudades::ciudadAMenosDe(string: origen,float: maxKm): Lista<string>
+var
+    Lista<string>: result
+    float: acum
+    array[1..n] of bool: visitados
+    PointerToNodoVertice<string>: ptrOrigen
+begin
+    result.construir()
+    acum <- 0
+    for i <- 1 to instance.getNVertices()
+        visitados[i] <- false
+    endfor
+    ptrOrigen <- instance.primero
+    while(ptrOrigen)do
+        if(ptrOrigen^.getInfo() = origen)then
+            break
+        endif
+        ptrOrigen <- ptrOrigen^.getSiguiente()
+    endwhile    
+    if(ptrOrigen)then
+        ciudadAMenosDe(ptrOrigen,maxKm,acum,visitados,result)
+    endif
+    return result
+endfunc
+
+proc MapaCiudades::ciudadAMenosDe(PointerToNodoVertice<string> act,float: maxKm,ref: float: acum,ref: array[1..n] of bool: visitados,ref: Lista<string>: result)
+var 
+    PointerToNodoArco<string>: listaAdy
+    PointerToNodoVertice<string>: next
+begin
+    visitados[act^.getInfo()] <- true
+    listaAdy <- act^.getListaAdy()
+    while(listaAdy)do
+        next <- listaAdy^.getDestino()
+        if(acum + listaAdy^.getPeso() < maxKm)then
+            if(!result.contiene(next^.getInfo()))then
+                result.insertar(next^.getInfo(),result.getLength()+1)
+            endif
+            if(!visitados[next^.getInfo()])then
+                ciudadAMenosDe(next,maxKm,acum+listaAdy^.getPeso(),visitados,result)
+            endif
+        endif
+        listaAdy <- listaAdy^.getSiguiente()
+    endwhile
+    visitados[act^.getInfo()] <- false
+endproc
+
+
