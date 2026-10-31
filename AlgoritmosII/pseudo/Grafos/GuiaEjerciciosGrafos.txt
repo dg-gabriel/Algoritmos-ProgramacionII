@@ -527,4 +527,48 @@ begin
     return result
 endfunc
 
+Dado un grafo dirigido acíclico (DAG), implemente el algoritmo de ordenamiento topológico. El resultado debe ser una
+lista de nodos donde cada nodo aparece antes que sus dependientes
 
+func topologicalSort(Grafo<int>: g): Lista<int>
+var
+    Lista<int>: result
+    int: n
+    Array[1..N] of bool: visitados
+begin
+    result.construir()
+    n <- g.getVertices()
+    if(g.esNulo())then
+        return result
+    endif
+    for i <- 1 to n do
+        visitados[i] <- false
+    endfor
+    for i <- 1 to n do
+        if(!visitados[i])then
+            topologicalSort(g,i,visitados,result)
+        endif
+    endfor
+    return result
+endfunc
+
+proc topologicalSort(Grafo<int>: g,int act,ref: Array[1..n] of bool: visitados,ref: Lista<int>: result)
+var
+    Lista<int>: sucesores
+    int: v
+begin
+    visitados[act] <- true
+    sucesores <- g.getSucesores(act)
+    while(!sucesores.esVacia())do
+        v <- sucesores.consultar(1)
+        if(!visitados[v])then
+            visitados[v] <- true
+            topologicalSort(g,v,visitados,result)
+        endif
+        sucesores.eliminar(1)
+    endwhile
+    result.insertar(act,1)
+endproc
+
+// debio ser insercion al inicio
+// debe marcarse como visitado al inicio de la funcion no al final
