@@ -572,3 +572,105 @@ endproc
 
 // debio ser insercion al inicio
 // debe marcarse como visitado al inicio de la funcion no al final
+
+Implemente el algoritmo de Dijkstra para encontrar las distancias mínimas desde un nodo origen hacia todos los demás
+nodos del grafo dirigido con pesos positivos. Debe utilizar una cola de prioridad.
+
+// se asume grafo mapeado
+// se asume la estructura ColaPrioridad<Element> con el metodo insertar(elem,prioridad)
+func dijkstra(Grafo<int>: g,int: origen): Array[1..n] of float
+var
+    Array[1..n] of float: distancias
+    Array[1..n] of bool: visitados
+    ColaPrioridad<int>: cola
+    Lista<int>: vecinos
+    float: costoAct
+    int: i,v,w
+begin
+    for i <- 1 to g.getNvertices() do
+        distancias[i] <- 999
+        visitados[i] <- false
+    endfor
+    distancias[origen] <- 0
+    cola.insertar(origen,0)
+    while(!cola.esVacia())do
+        v <- cola.getHead()
+        cola.desencolar()
+        if(!visitados[v])then
+            visitados[v] <- true
+            vecinos <- g.getSucesores(v)
+            while(!vecinos.esVacia())do
+                w <- vecinos.consultar(1)
+                costoAct <- distancias[v] + g.getCostoArco(v,w)
+                if(costoAct < distancias[w])then
+                    distancias[w] <- costoAct
+                endif
+                if(!visitados[w])then
+                    cola.insertar(w,distancias[w])
+                endif
+                vecinos.eliminar(1)
+            endwhile
+        endif
+    endwhile
+    return distancias
+endfunc
+
+
+Dado un grafo no dirigido, determine todas las aristas puente, es decir, aristas cuya eliminación aumenta el número de
+componentes conexas del grafo.
+
+El algoritmo debe basarse en DFS utilizando discovery time y low values.
+
+func puentes(Grafo<int>: g): Lista<Lista<int>>
+var
+    Lista<Lista<int>: result
+    Array[1..N] of bool: visitados
+    Array[1..N] of int: disc 
+    Array[1..N] of int: low
+    int: i,pasos
+begin
+    result.construir()
+    for i <- 1 to g.getNVertices() do 
+        visitados[i] <- false 
+    endfor
+    pasos <- 1
+    for i <- 1 to g.getNvertices() do
+        if(!visitados[i])then
+            puentesDFS(g,i,visitados,disc,low,pasos,result)
+        endif
+    endfor
+    return result
+endfunc
+
+proc puentesDFS(Grafo<int>: g,int: v,int: padre,ref: Array[1..N] of bool: visitados,ref: Array[1..N] of int: disc,ref: Array[1..N] of int: low,ref; int: pasos,ref:Lista<Lista<int>>: result)
+var 
+    Lista<int>: vecinos,arco
+    int: w
+begin
+    vecinos.construir()
+    visitados[v] <- true
+    disc[v] <- pasos 
+    low[v] <- pasos
+    vecinos <- g.getVecinos()
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            puentesDFS(g,w,v,visitados,disc,low,pasos+1,result)
+            low[v] <- min(low[v],low[w])
+            if(low[w] > disc[v])then
+                arco.construir()
+                arco.insertar(v,1)
+                arco.insertar(w,2)
+                result.insertar(arco,result.getLength()+1)
+            endif
+        else
+            if(w <> padre)then
+                low[v] <- min(low[v],disc[w])
+            endif
+        endif
+        vecinos.eliminar(1)
+    endwhile
+endproc
+
+// lo verdaderamente complicado lo tuve que sacar de un video
+// no pude divisar el uso de la variable padre 
