@@ -145,7 +145,7 @@ begin
     listaAdy <- act^.getListaAdy()
     while(listaAdy)do
         next <- listaAdy^.getDestino()
-        if(acum + listaAdy^.getPeso() < maxKm)then
+        if(acum + listaAdy^.getPeso() <= maxKm)then
             if(!result.contiene(next^.getInfo()))then
                 result.insertar(next^.getInfo(),result.getLength()+1)
             endif
