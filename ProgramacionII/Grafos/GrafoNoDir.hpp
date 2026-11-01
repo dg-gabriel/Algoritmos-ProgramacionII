@@ -18,38 +18,52 @@ class GrafoNoDir{
         int nVertices,nArcos;
 
         // metodos auxiliares
-        NodoVertice<Element>* buscarVertice(Element v);                                 // O(n)
+        NodoVertice<Element>* buscarVertice(const Element& v);                          // O(n)
         NodoArco<Element>* buscarArco(NodoVertice<Element>* v,NodoVertice<Element>* w); // O(arcos(v))
         void insertarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w,float p);  // O(1), auxiliar de insercion
         bool eliminarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w);          // O(arcos(o)), retorna true si exisita el arco                            
         int vaciarListaArcos(NodoArco<Element>* lista);                                 // vacia la lista de ady y retorna cuantos borro
         void copiarGrafo(const GrafoNoDir<Element>& target);                            // auxiliar para copiar un grafo
+        void bfsAux(NodoVertice<Element>* inicio,                                       
+                    map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido por niveles
+                    list<Element>& recorrido); 
+        void dfsAux(NodoVertice<Element>* act, 
+                    map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido recursivo
+                    list<Element>& recorrido);
     public:
         GrafoNoDir();                                                           // O(1), constructor
         GrafoNoDir(const GrafoNoDir<Element>& target);                          // O(n+m), constructor copia
         ~GrafoNoDir();                                                          // O(n+m), destructor
         GrafoNoDir<Element>& operator=(const GrafoNoDir<Element>& target);      // O(n+m), sobrecarga del op. de asignacion
-        void insertarVertice(Element v);                                        // O(1), inserta nuevo vertice al principio
-        void insertarArco(Element v,Element w,float p);                         // O(n), inserta nuevo arco al inicio de ambas listas de ady
-        list<Element> getVecinos(Element v);                                    // O(n+arcos(v)), retorna una lista de todos quienes inciden en v
-        bool existeVertice(Element v);                                          // O(n), true si v esta en el grafo, false si no
-        bool existeArco(Element v,Element w);                                   // O(n+k), true si hay un arco de v a w, false si no
-        float getCostoArco(Element v,Element w);                                // O(n+k), retorna el costo del arco
+        void insertarVertice(const Element& v);                                 // O(1), inserta nuevo vertice al principio
+        void insertarArco(const Element& v,const Element& w,float p);           // O(n), inserta nuevo arco al inicio de ambas listas de ady
+        list<Element> getVecinos(const Element& v);                             // O(n+arcos(v)), retorna una lista de todos quienes inciden en v
+        bool existeVertice(const Element& v);                                   // O(n), true si v esta en el grafo, false si no
+        bool existeArco(const Element& v,const Element& w);                     // O(n+k), true si hay un arco de v a w, false si no
+        float getCostoArco(const Element& v,const Element& w);                  // O(n+k), retorna el costo del arco
         list<list<Element> > getArcos();                                        // O(n+m), retorna una lista de todas las adyacencias [[v1,v2],[v2,v3]]
         list<Element> getVertices();                                            // O(n), retorna la lista de todos los vertices
         bool esVacio();                                                         // O(1), ya sabes que hace esto
-        void eliminarArco(Element v,Element w);                                 // O(n+k), elimina el arco entre v y w
-        void eliminarVertice(Element v);                                        // O(n+m), elimina el vertice v y toda incidencia que haya en el
-        void modificarPesoArco(Element v,Element w,float p);                    // O(n+k)
+        void eliminarArco(const Element& v,const Element& w);                   // O(n+k), elimina el arco entre v y w
+        void eliminarVertice(const Element& v);                                 // O(n+m), elimina el vertice v y toda incidencia que haya en el
+        void modificarPesoArco(const Element& v,const Element& w,float p);      // O(n+k)
         int getNVertices();                                                     // O(1)
         int getNArcos();                                                        // O(1)
-        list<Element> bfs(Element v);                                           // O(n+m), busqueda en anchura
-        list<Element> dfs(Element v);                                           // O(n+m), busqueda en profundidad
+        list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura
+        list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad
         void vaciar();                                                          // O(n+m)
+        // dijkstra
+        // tarjan para aristas puente
+        // tarjan para puntos de articulacion
+        // tarjan para componentes fuertemente conexas
+        // get nro componentes conexas
+        // mapear grafo
 };
 
+/////////// Privados ///////////
+
 template <class Element>
-NodoVertice<Element>* GrafoNoDir<Element>::buscarVertice(Element v){
+NodoVertice<Element>* GrafoNoDir<Element>::buscarVertice(const Element& v){
     NodoVertice<Element>* act = primero;
     while(act){
         if(act->getInfo() == v){
@@ -156,6 +170,60 @@ void GrafoNoDir<Element>::copiarGrafo(const GrafoNoDir<Element>& target){
 }
 
 template <class Element>
+void GrafoNoDir<Element>::bfsAux(NodoVertice<Element>* inicio, map<NodoVertice<Element>*, bool>& visitado, list<Element>& recorrido){
+    queue<NodoVertice<Element>*> cola;
+    cola.push(inicio);
+    visitado[inicio] = true;                       // se marca al encolar
+
+    while(!cola.empty()){
+        NodoVertice<Element>* act = cola.front();
+        cola.pop();
+        recorrido.push_back(act->getInfo());
+
+        NodoArco<Element>* arco = act->getListaAdy();
+        while(arco){
+            NodoVertice<Element>* destino = arco->getDestino();
+            if(!visitado[destino]){
+                visitado[destino] = true;
+                cola.push(destino);
+            }
+            arco = arco->getSiguiente();
+        }
+    }
+}
+
+template <class Element>
+void GrafoNoDir<Element>::dfsAux(NodoVertice<Element>* inicio, map<NodoVertice<Element>*, bool>& visitado, list<Element>& recorrido){
+    stack<NodoVertice<Element>*> pila;
+    pila.push(inicio);
+
+    while(!pila.empty()){
+        NodoVertice<Element>* act = pila.top();
+        pila.pop();
+
+        if(!visitado[act]){                           
+            visitado[act] = true;
+            recorrido.push_back(act->getInfo());
+
+            list<NodoVertice<Element>*> vecinos;
+            NodoArco<Element>* arco = act->getListaAdy();
+            while(arco){
+                if(!visitado[arco->getDestino()]){
+                    vecinos.push_front(arco->getDestino());
+                }
+                arco = arco->getSiguiente();
+            }
+            typename list<NodoVertice<Element>*>::iterator it;
+            for(it = vecinos.begin(); it != vecinos.end(); ++it){
+                pila.push(*it);
+            }
+        }
+    }
+}
+
+/////////// Publicos ///////////
+
+template <class Element>
 GrafoNoDir<Element>::GrafoNoDir(){
     primero = NULL;
     nVertices = 0;
@@ -183,14 +251,14 @@ GrafoNoDir<Element>& GrafoNoDir<Element>::operator=(const GrafoNoDir<Element>& t
 }
 
 template <class Element>
-void GrafoNoDir<Element>::insertarVertice(Element v){
+void GrafoNoDir<Element>::insertarVertice(const Element& v){
     NodoVertice<Element>* nuevo = new NodoVertice<Element>(v,primero,NULL);
     primero = nuevo;
     nVertices++;
 }
 
 template <class Element>
-void GrafoNoDir<Element>::insertarArco(Element v,Element w,float p){
+void GrafoNoDir<Element>::insertarArco(const Element& v,const Element& w,float p){
     NodoVertice<Element> *ptrV,*ptrW;
     ptrV = buscarVertice(v);
     ptrW = buscarVertice(w);
@@ -208,7 +276,7 @@ void GrafoNoDir<Element>::insertarArco(Element v,Element w,float p){
 }
 
 template <class Element>
-list<Element> GrafoNoDir<Element>::getVecinos(Element v){
+list<Element> GrafoNoDir<Element>::getVecinos(const Element& v){
     list<Element> res;
     NodoVertice<Element>* ptrV = buscarVertice(v);
     if(ptrV){
@@ -222,12 +290,12 @@ list<Element> GrafoNoDir<Element>::getVecinos(Element v){
 }
 
 template <class Element>
-bool GrafoNoDir<Element>::existeVertice(Element v){
+bool GrafoNoDir<Element>::existeVertice(const Element& v){
     return buscarVertice(v) != NULL;
 }
 
 template <class Element>
-bool GrafoNoDir<Element>::existeArco(Element v,Element w){
+bool GrafoNoDir<Element>::existeArco(const Element& v,const Element& w){
     NodoVertice<Element> *ptrV = buscarVertice(v),*ptrW = buscarVertice(w);
     if(!ptrV || !ptrW){
         return false;
@@ -236,7 +304,7 @@ bool GrafoNoDir<Element>::existeArco(Element v,Element w){
 }
 
 template <class Element>
-float GrafoNoDir<Element>::getCostoArco(Element v,Element w){
+float GrafoNoDir<Element>::getCostoArco(const Element& v,const Element& w){
     NodoVertice<Element>* ptrV = buscarVertice(v),*ptrW = buscarVertice(w);
     if(ptrV && ptrW){
         NodoArco<Element>* ptrArco = buscarArco(ptrV,ptrW);
@@ -284,7 +352,7 @@ bool GrafoNoDir<Element>::esVacio(){
 }
 
 template <class Element>
-void GrafoNoDir<Element>::eliminarArco(Element v,Element w){
+void GrafoNoDir<Element>::eliminarArco(const Element& v,const Element& w){
     NodoVertice<Element> *ptrV = buscarVertice(v), *ptrW = buscarVertice(w);
     if(!ptrV || !ptrW){
         return;
@@ -298,7 +366,7 @@ void GrafoNoDir<Element>::eliminarArco(Element v,Element w){
 }
 
 template <class Element>
-void GrafoNoDir<Element>::eliminarVertice(Element v){
+void GrafoNoDir<Element>::eliminarVertice(const Element& v){
     NodoVertice<Element> *ptrV = buscarVertice(v);
     if(!ptrV){
         return;
@@ -331,7 +399,7 @@ void GrafoNoDir<Element>::eliminarVertice(Element v){
 }
 
 template <class Element>
-void GrafoNoDir<Element>::modificarPesoArco(Element v,Element w,float p){
+void GrafoNoDir<Element>::modificarPesoArco(const Element& v,const Element& w,float p){
     NodoVertice<Element> *ptrV,*ptrW;
     ptrV = buscarVertice(v);
     ptrW = buscarVertice(w);
@@ -355,9 +423,27 @@ int GrafoNoDir<Element>::getNArcos(){
     return nArcos;
 }
 
-//bfs
+template <class Element>
+list<Element> GrafoNoDir<Element>::bfs(const Element& v){
+    list<Element> recorrido;
+    NodoVertice<Element>* inicio = buscarVertice(v);
+    if(inicio){
+        map<NodoVertice<Element>*, bool> visitado;
+        bfsAux(inicio, visitado, recorrido);
+    }
+    return recorrido;
+}
 
-//dfs
+template <class Element>
+list<Element> GrafoNoDir<Element>::dfs(const Element& v){
+    list<Element> recorrido;
+    NodoVertice<Element>* inicio = buscarVertice(v);
+    if(inicio){
+        map<NodoVertice<Element>*, bool> visitado;
+        dfsAux(inicio, visitado, recorrido);
+    }
+    return recorrido;
+}
 
 template <class Element>
 void GrafoNoDir<Element>::vaciar(){

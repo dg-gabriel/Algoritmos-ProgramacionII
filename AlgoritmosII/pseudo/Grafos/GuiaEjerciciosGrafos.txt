@@ -674,3 +674,39 @@ endproc
 
 // lo verdaderamente complicado lo tuve que sacar de un video
 // no pude divisar el uso de la variable padre 
+
+
+Dado un grafo no dirigido, determine los puntos de articulación, es decir, vértices cuya eliminación desconecta alguna
+parte del grafo.
+La solución debe basarse en DFS con discovery time y low values.
+
+// se asume grafo mapeado
+func puntosArticulacion(Grafo<int>: g): Lista<int>
+var
+    Array[1..N] of bool: visitados
+    Array[1..N] of int: disc,low
+    Lista<int>: result
+    int: pasos,i
+begin
+    result.construir()
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- true
+    endfor
+    pasos <- 0
+    for i <- to g.getNvertices() do 
+        if(!visitados[i])then
+            puntosArticulacion(g,i,pasos,visitados,disc,low,result)
+        endif
+    endfor
+    return result
+endfunc
+
+func puntosArticulacion(Grafo<int>: g,int: v,pasos,ref: Array[1..N] of bool: visitados,ref: Array[1..N] of int: disc,ref: Array[1..N] of int: low,ref: Lista<int>: result)
+var 
+    Lista<int>: vecinos
+begin
+    pasos <- pasos + 1
+    disc[i] = pasos
+    low[i] = pasos
+    visitados[i] <- true
+    arcoAct <- 
