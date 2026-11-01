@@ -17,6 +17,7 @@ class GrafoNoDir{
         NodoVertice<Element>* primero;                                  
         int nVertices,nArcos;
 
+        // metodos auxiliares
         NodoVertice<Element>* buscarVertice(Element v);                                 // O(n)
         NodoArco<Element>* buscarArco(NodoVertice<Element>* v,NodoVertice<Element>* w); // O(arcos(v))
         void insertarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w,float p);  // O(1), auxiliar de insercion
@@ -232,6 +233,51 @@ bool GrafoNoDir<Element>::existeArco(Element v,Element w){
         return false
     }
     return buscarArco(ptrV,ptrW) != NULL;
+}
+
+template <class Element>
+float GrafoNoDir<Element>::getCostoArco(Element v,Element w){
+    NodoVertice<Element>* ptrV = buscarVertice(v),*ptrW = buscarVertice(w);
+    if(ptrV && ptrW){
+        NodoArco<Element>* ptrArco = buscarArco(v,w);
+        if(ptrArco){
+            return ptrArco->getPeso();
+        }
+    }
+    return 0.0;
+}
+
+template <class Element>
+list<list<Element> > GrafoNoDir<Element>::getArcos(){
+    list<list<Element> > res;
+    NodoVertice<Element>* act = primero;
+    while(act){
+        NodoArco<Element> *arcoAct = act->getListaAdy();
+        while(arcoAct){
+            list<Element> arco;
+            arco.push_back(act->getInfo());
+            arco.push_back(arcoAct->getDestino()->getInfo());
+            arcoAct = arcoAct->getSiguiente();
+            res.push_back(arco);
+        }
+        act = act->getSiguiente();
+    }
+    return res;
+}
+
+template <class Element>
+list<Element> GrafoNoDir<Element>::getVertices(){
+    list<Element> res;
+    NodoVertice<Element> *act = primero;
+    while(act){
+        res.push_back(act->getInfo());
+    }
+    return res;
+}
+
+template <class Element>
+bool GrafoNoDir<Element>::esVacio(){
+    return primero != NULL;
 }
 
 #endif

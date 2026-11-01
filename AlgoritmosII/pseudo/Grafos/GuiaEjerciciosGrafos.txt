@@ -664,7 +664,7 @@ begin
                 result.insertar(arco,result.getLength()+1)
             endif
         else
-            if(w <> padre)then
+            if(w != padre)then
                 low[v] <- min(low[v],disc[w])
             endif
         endif

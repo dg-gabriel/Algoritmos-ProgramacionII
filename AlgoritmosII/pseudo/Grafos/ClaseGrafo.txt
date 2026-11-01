@@ -42,9 +42,9 @@ Methods:
         proc insertarVertice(Element: v)                        // O(1)
         proc insertarArcoDirigido(Element: v w,float: peso)     // O(n)
         proc insertarArcoNoDirigido(Element: v,w,float: peso)   // O(n)
-        func getSucesores(Element: v): Lista<Element>           // O(n+m) k <= m
+        func getSucesores(Element: v): Lista<Element>           // O(n+k) k <= m
         func getPredecesores(Element: v): Lista<Element>        // O(n+m)
-        func getVecinos(Element: v): Lista<Element>             // O(n+m) k <= m 
+        func getVecinos(Element: v): Lista<Element>             // O(n+k) k <= m 
         func existeVertice(Element: v): bool                    // O(n)
         func existeArco(Element: v,w): bool                     // O(n+k)
         func getCostoArco(Element: v,w): float
