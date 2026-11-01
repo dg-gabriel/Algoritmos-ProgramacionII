@@ -254,7 +254,7 @@ list<list<Element> > GrafoNoDir<Element>::getArcos(){
     while(act){
         NodoArco<Element> *arcoAct = act->getListaAdy();
         while(arcoAct){
-            if(act < arcoAct->getDestino()){
+            if(arcoAct->getDestino()->getInfo() < act->getInfo()){
                 list<Element> arco;
                 arco.push_back(act->getInfo());
                 arco.push_back(arcoAct->getDestino()->getInfo());
@@ -286,7 +286,9 @@ bool GrafoNoDir<Element>::esVacio(){
 template <class Element>
 void GrafoNoDir<Element>::eliminarArco(Element v,Element w){
     NodoVertice<Element> *ptrV = buscarVertice(v), *ptrW = buscarVertice(w);
-    if(!ptrV || !ptrW)
+    if(!ptrV || !ptrW){
+        return;
+    }
     if(eliminarArcoAux(ptrV, ptrW)){      
         if(ptrV != ptrW){
             eliminarArcoAux(ptrW, ptrV); 
@@ -297,15 +299,79 @@ void GrafoNoDir<Element>::eliminarArco(Element v,Element w){
 
 template <class Element>
 void GrafoNoDir<Element>::eliminarVertice(Element v){
-    NodoVertice<Element> *ptrV = buscarVertice(v),*ant;
-    if(ptrV){
-        ant = primero;
-        while(ant->getSiguiente() != ptrV){
-            ant = ant->getSiguiente();
-        }
-        ant->setSiguiente(ptrV->getSiguiente());
-        delete ptrV;
+    NodoVertice<Element> *ptrV = buscarVertice(v);
+    if(!ptrV){
+        return;
     }
+    NodoArco<Element>* arcosV = ptrV->getListaAdy();
+    while(arcosV){
+        NodoVertice<Element> *w = arcosV->getDestino();
+        if(w != ptrV){
+            eliminarArcoAux(arcosV->getDestino(),ptrV);
+        }
+        arcosV = arcosV->getSiguiente();
+    }
+    nArcos -= vaciarListaArcos(ptrV->getListaAdy());
+
+    NodoVertice<Element>* act = primero;
+    NodoVertice<Element>* ant = NULL;
+    while(act != ptrV){
+        ant = act;
+        act = act->getSiguiente();
+    }
+    if(ant){
+        ant->setSiguiente(ptrV->getSiguiente());
+    }
+    else{
+        primero = ptrV->getSiguiente();
+    }
+        
+    delete ptrV;     
+    nVertices--;
+}
+
+template <class Element>
+void GrafoNoDir<Element>::modificarPesoArco(Element v,Element w,float p){
+    NodoVertice<Element> *ptrV,*ptrW;
+    ptrV = buscarVertice(v);
+    ptrW = buscarVertice(w);
+    if((!ptrV || !ptrW) || p < 0){
+        return;
+    }
+    NodoArco<Element> *ptrArco = buscarArco(ptrV,ptrW);
+    if(ptrArco){
+        ptrArco->setPeso(p);
+    }
+    return;
+}
+
+template <class Element>
+int GrafoNoDir<Element>::getNVertices(){
+    return nVertices;
+}
+
+template <class Element>
+int GrafoNoDir<Element>::getNArcos(){
+    return nArcos;
+}
+
+//bfs
+
+//dfs
+
+template <class Element>
+void GrafoNoDir<Element>::vaciar(){
+    NodoVertice<Element>* act = primero;
+    NodoVertice<Element>* sig;
+    while(act){
+        sig = act->getSiguiente();              
+        vaciarListaArcos(act->getListaAdy());   
+        delete act;                             
+        act = sig;                              
+    }
+    primero = NULL;
+    nVertices = 0;
+    nArcos = 0;
 }
 
 #endif
