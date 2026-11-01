@@ -690,23 +690,46 @@ var
 begin
     result.construir()
     for i <- 1 to g.getNVertices() do
-        visitados[i] <- true
+        visitados[i] <- false
     endfor
     pasos <- 0
     for i <- to g.getNvertices() do 
         if(!visitados[i])then
-            puntosArticulacion(g,i,pasos,visitados,disc,low,result)
+            puntosArticulacion(g,i,0,pasos,visitados,disc,low,result)
         endif
     endfor
     return result
 endfunc
 
-func puntosArticulacion(Grafo<int>: g,int: v,pasos,ref: Array[1..N] of bool: visitados,ref: Array[1..N] of int: disc,ref: Array[1..N] of int: low,ref: Lista<int>: result)
+func puntosArticulacion(Grafo<int>: g,int: v,int: padre,ref: int: pasos,ref: Array[1..N] of bool: visitados,ref: Array[1..N] of int: disc,ref: Array[1..N] of int: low,ref: Lista<int>: result)
 var 
     Lista<int>: vecinos
+    int: w
 begin
     pasos <- pasos + 1
-    disc[i] = pasos
-    low[i] = pasos
-    visitados[i] <- true
-    arcoAct <- 
+    disc[v] = pasos
+    low[v] = pasos
+    visitados[v] <- true
+    vecinos <- g.getVecinos(v)
+    if(padre == 0 && vecinos.getLength() > 1)then
+        result.insertar(v)
+    endif
+    while(!vecinos.esVacia())
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            puntosArticulacion(g,w,v,pasos,visitados,disc,low,result)
+            low[v] <- min(low[v],low[w])
+            if(low[w] >= disc[v])then
+                result.insertar(v)
+            endif
+        else
+            if(w != padre)then
+                low[v] <- min(low[v],disc[w])
+            endif
+        endif
+        vecinos.eliminar(1)
+    endwhile
+endfunc
+
+// errores menores (no pasaste pasos por ref, inicializaste en true ne vez de false)
+// la comparacion para puntos de articulacion es >= no >
