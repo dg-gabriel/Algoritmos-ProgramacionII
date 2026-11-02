@@ -16,6 +16,13 @@ class GrafoDir{
     private:
         NodoVertice<Element>* primero;                                  
         int nVertices,nArcos;
+
+        // metodos auxiliares
+        NodoVertice<Element>* buscarVertice(const Element& v);                          // O(n)
+        NodoArco<Element>* buscarArco(NodoVertice<Element>* v,NodoVertice<Element>* w); // O(arcos(v))
+        void insertarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w,float p);  // O(1), auxiliar de insercion
+        bool eliminarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w);          // O(arcos(o)), retorna true si exisita el arco                            
+        
     public:
         GrafoDir();                                                             // O(1), constructor
         GrafoDir(const GrafoDir<Element>& target);                              // O(n+m), constructor copia
@@ -39,5 +46,93 @@ class GrafoDir{
         int getNArcos();                                                        // O(1)
         void vaciar();                                                          // O(n+m)
 };
+
+//////////// Privados //////////
+
+template <class Element>
+NodoVertice<Element>* GrafoDir<Element>::buscarVertice(const Element& v){
+    NodoVertice<Element>* act = primero;
+    while(act){
+        if(act->getInfo() == v){
+            return act;
+        }
+        act = act->getSiguiente();
+    }
+    return NULL;
+}
+
+template <class Element>
+NodoArco<Element>* GrafoDir<Element>::buscarArco(NodoVertice<Element>* v,NodoVertice<Element>* w){
+    NodoArco<Element>* ptrArco = v->getListaAdy();
+    while(ptrArco){
+        if(ptrArco->getDestino() == w){
+            return ptrArco;
+        }
+        ptrArco = ptrArco->getSiguiente();
+    }
+    return NULL;
+}
+
+template <class Element>
+void GrafoDir<Element>::insertarArcoAux(NodoVertice<Element>* v, NodoVertice<Element>* w, float p){
+    v->setListaAdy(new NodoArco<Element>(w, v->getListaAdy(), p));
+}
+ 
+
+template <class Element>
+bool GrafoDir<Element>::eliminarArcoAux(NodoVertice<Element>* o, NodoVertice<Element>* d){
+    NodoArco<Element>* act = o->getListaAdy();
+    NodoArco<Element>* ant = NULL;
+    while(act != NULL && act->getDestino() != d){
+        ant = act;
+        act = act->getSiguiente();
+    }
+    if(act == NULL){
+        return false;
+    }
+    if(ant != NULL){
+        ant->setSiguiente(act->getSiguiente());
+    }
+    else{
+        o->setListaAdy(act->getSiguiente());
+    }
+    delete act;
+    return true;
+}
+
+/////////// Publicos ///////////
+
+template <class Element>
+GrafoDir<Element>::GrafoDir(){
+    primero = NULL;
+    nVertices = 0;
+    nArcos = 0;
+}
+
+template <class Element>
+GrafoDir<Element>::GrafoDir(const GrafoDir<Element>& target){
+    copiarGrafo(target);
+}
+
+template <class Element>
+void GrafoDir<Element>::insertarVertice(Element v){
+    NodoVertice<Element> nuevo = new NodoVertice<Element>(v,primero,NULL);
+    primero = nuevo;
+    nVertices++;
+}
+
+template <class Element>
+void GrafoDir<Element>::insertarArco(Element v,Element w,float p){
+    NodoVertice<Element> *ptrV,*ptrW;
+    ptrV = buscarVertice(v);
+    ptrW = buscarVertice(w);
+    if(!ptrV || !ptrW){
+        return;
+    }
+    insertarArcoAux(ptrV,ptrW,p);
+    nArcos++;
+}
+
+
 
 #endif

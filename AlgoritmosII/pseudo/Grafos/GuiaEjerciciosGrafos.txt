@@ -601,12 +601,12 @@ begin
             vecinos <- g.getSucesores(v)
             while(!vecinos.esVacia())do
                 w <- vecinos.consultar(1)
-                costoAct <- distancias[v] + g.getCostoArco(v,w)
-                if(costoAct < distancias[w])then
-                    distancias[w] <- costoAct
-                endif
                 if(!visitados[w])then
-                    cola.insertar(w,distancias[w])
+                    costoAct <- distancias[v] + g.getCostoArco(v,w)
+                    if(costoAct < distancias[w])then
+                        distancias[w] <- costoAct
+                        cola.insertar(w,distancias[w])
+                    endif
                 endif
                 vecinos.eliminar(1)
             endwhile
@@ -614,6 +614,93 @@ begin
     endwhile
     return distancias
 endfunc
+
+Modele un mapa de ciudades como un grafo no dirigido con pesos, donde cada arista representa una carretera y su
+peso es la distancia en kilómetros.
+
+proc MapaCiudades::agregarCiudad(string: nombre)
+var
+    PointerToNodoVertice<string>: nuevaCiud
+begin
+    nuevaCiud <- new(NodoVertice<string>)
+    nuevaCiud^.construir(nombre,instance.primero,NULL)
+    instance.primero <- nuevaCiud
+endproc
+
+proc MapaCiudades::agregarRuta(string: ciudad1,ciudad2,float: distancia)
+var
+    PointerToNodoVertice<string>: ptrA,ptrB,actual
+    PointerToNodoArco<string>: arcoA,arcoB
+begin
+    ptrA <- NULL
+    ptrB <- NULL
+    actual <- instance.primero
+    while(actual)do
+        if(actual^.getInfo() = ciudad1)then
+            ptrA <- actual
+        else if(actual^.getInfo() = ciudad2)then
+                ptrB <- actual
+            endif
+        endif
+        actual <- actual^.getSiguiente()
+    endwhile
+    if(ptrA AND ptrB)then
+        arcoA <- new(NodoArco<string>)
+        arcoA^.construir(ptrB,ptrA^.getListaAdy(),distancia)
+        ptrA^.setListaAdy(arcoA)
+
+        arcoB <- new(NodoArco<string>)
+        arcoB^.construir(ptrA,ptrB^.getListaAdy(),distancia)
+        ptrB^.setListaAdy(arcoB)
+    endif
+endproc
+
+func MapaCiudades::ciudadAMenosDe(string: origen,float: maxKm): Lista<string>
+var
+    Lista<string>: result
+    float: acum
+    array[1..n] of bool: visitados
+    PointerToNodoVertice<string>: ptrOrigen
+begin
+    result.construir()
+    acum <- 0
+    for i <- 1 to instance.getNVertices()
+        visitados[i] <- false
+    endfor
+    ptrOrigen <- instance.primero
+    while(ptrOrigen)do
+        if(ptrOrigen^.getInfo() = origen)then
+            break
+        endif
+        ptrOrigen <- ptrOrigen^.getSiguiente()
+    endwhile    
+    if(ptrOrigen)then
+        ciudadAMenosDe(ptrOrigen,maxKm,acum,visitados,result)
+    endif
+    return result
+endfunc
+
+proc MapaCiudades::ciudadAMenosDe(PointerToNodoVertice<string> act,float: maxKm,ref: float: acum,ref: array[1..n] of bool: visitados,ref: Lista<string>: result)
+var 
+    PointerToNodoArco<string>: listaAdy
+    PointerToNodoVertice<string>: next
+begin
+    visitados[act^.getInfo()] <- true
+    listaAdy <- act^.getListaAdy()
+    while(listaAdy)do
+        next <- listaAdy^.getDestino()
+        if(acum + listaAdy^.getPeso() <= maxKm)then
+            if(!result.contiene(next^.getInfo()))then
+                result.insertar(next^.getInfo(),result.getLength()+1)
+            endif
+            if(!visitados[next^.getInfo()])then
+                ciudadAMenosDe(next,maxKm,acum+listaAdy^.getPeso(),visitados,result)
+            endif
+        endif
+        listaAdy <- listaAdy^.getSiguiente()
+    endwhile
+    visitados[act^.getInfo()] <- false
+endproc
 
 
 Dado un grafo no dirigido, determine todas las aristas puente, es decir, aristas cuya eliminación aumenta el número de
