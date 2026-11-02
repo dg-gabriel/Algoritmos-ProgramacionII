@@ -738,3 +738,152 @@ endproc
 
 // errores menores (no pasaste pasos por ref, inicializaste en true ne vez de false)
 // la comparacion para puntos de articulacion es >= no >
+
+Modele una red eléctrica como un grafo no dirigido donde los nodos son subestaciones y las aristas son líneas de
+transmisión
+
+proc RedElectrica::agregarSubestacion(string: id)
+var
+    PointerToNodoVertice<string>: nuevaSub
+begin
+    nuevaSub <- new(NodoVertice(id,instance.primero,NULL))
+    primero = nuevaSub
+endproc
+
+proc RedElectrica::agregarLinea(string: a,b)
+var
+    PointerToNodoVertice<string>: act,ptrA,ptrB
+    PointerToNodoArco<string>: nuevoArcoA,nuevoArcoB
+begin
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = a)then
+            ptrA <- act
+        else if(act^.getInfo() = b)then
+                ptrB <- act
+            endif
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(!ptrA || !ptrB)then
+        return
+    endif
+    nuevoArcoA <- new(NodoArco(ptrB,ptrA^.getListaAdy(),0))
+    ptrA^.setListaAdy(nuevoArcoA)
+    nuevoArcoB <- new(NodoArco(ptrA,ptrB^.getListaAdy(),0))
+    ptrB^.setListaAdy(nuevoArcoB)
+endproc
+
+func subestacionesCriticas(Grafo<string>: grafo): Lista<string>
+var
+    Grafo<int>: g
+    Array[1..N] of string: nombres
+    Array[1..N] of bool: visitados
+    Array[1..N] of int: disc,low
+    Lista<string>: intRes
+    Lista<string>: result
+    int: pasos,i,n
+begin
+    g <- mapearGrafo(g,nombres)
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- false
+    endfor
+    pasos <- 0
+    for i <- 1 to g.getNVertices do
+        if(!visitados[i])then
+            subestacionesCriticas(g,i,0,pasos,visitados,disc,low,intRes)
+        endif
+    endfor
+    n <- intRes.getLength()
+    for i <- 1 to n do
+        result.insertar(nombres[intRes.consultar(1)],result.getLength()+1)
+        intRes.eliminar(1)
+    endfor
+    return result
+endfunc
+
+proc subestacionesCriticas(Grafo<int>: g,int: v,padre,ref: int: pasos,ref: Array[1..N] of bool: visitados,ref: Array[1..N] of int: disc,ref: Array[1..N] of int: low,ref:Lista<int>: result)
+var
+    int: w,hijos
+    Lista<int>: vecinos
+    bool: insertar 
+begin
+    insertar <- false
+    hijos <- 0
+    visitados[v] <- true
+    pasos <- pasos + 1
+    disc[v] <- pasos
+    low[v] <- pasos
+    vecinos <- g.getVecinos(v)
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            subestacionesCriticas(g,w,v,pasos,visitados,disc,low,result)
+            hijos <- hijos + 1
+            low[v] <- min(low[v],low[w])
+            if(low[w] >= disc[v] && padre != 0)then
+                insertar <- true
+            endif
+        else
+            if(padre != w)then
+                low[v] <- min(low[v],disc[w])
+            endif
+        endif
+        vecinos.eliminar(1)
+    endwhile
+    if((padre == 0 && hijos > 1) || insertar)then
+        result.insertar(v,result.getLength()+1)
+    endif
+endproc
+
+func simularFallo(Grafo<string>: grafo,string: sub)
+var
+    Grafo<int>: g 
+    Arrray[1..N] of string: nombres
+    Array[1..N] of bool: visitados
+    int: i,inicial,u,v,w,nroComp
+    Lista<int>: vertices,vecinos
+    Cola<int>: cola
+begin
+    g <- mapearGrafo(grafo,nombres)
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- false
+    endfor
+    inicial <- 0
+    for i <- 1 to nombres.length() do
+        if(nombres[i] = sub)then
+            inicial = i
+        endif
+    endfor
+    if(!inicial)then
+        return 0
+    endif
+    visitados[inicial] <- true
+    nroComp <- 0
+    vertices <- g.getVertices()
+    while(!vertices.esVacia())do
+        u <- vertices.consultar(1)
+        if(visitados[u])then
+            vertices.eliminar(1)
+        else
+            nroComp <- nroComp + 1
+            visitados[u] <- true
+            cola.construir()
+            cola.encolar(u)
+            while(!cola.esVacia())do
+                v <- cola.getHead()
+                vecinos <- g.getVecinos(v)
+                while(!vecinos.esVacia())do
+                    w <- vecinos.consultar(1)
+                    if(!visitados[w])then
+                        visitados[w] <- true
+                        cola.encolar(w)
+                    endif
+                    vecinos.eliminar(1)
+                endwhile
+                cola.desencolar()
+            endwhile
+        endif
+    endwhile
+    return nroComp
+endfunc
