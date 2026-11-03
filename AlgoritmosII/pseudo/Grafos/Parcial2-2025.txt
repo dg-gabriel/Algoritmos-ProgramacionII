@@ -1,0 +1,66 @@
+Desarrolle el método de la clase GrafoNoDirigido:
+func GrafoNoDirigido<Elemento>::countIsolated(): int
+Que retorne el número de nodos aislados (que no están conectados con ningún otro). Su solución debe
+ser a lo sumo O(n + m) DEBE USAR APUNTADORES EN SU SOLUCIÓN
+
+func GrafoNoDir<Element>::countIsolated(): int
+var 
+    PointerToNodoVertice<Element>: act
+    int: cont 
+begin
+    cont <- 0
+    act <- instance.primero
+    while(act)do
+        if(!act^.getListaAdy())then
+            cont <- cont + 1
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    return cont
+endfunc
+
+Dado un grafo no dirigido, no ponderado y mapeado, cree la función::
+func createsCycle(Grafo<int>: g, int: u, int: v): bool
+Que determine si al agregar el arco (u, v) al grafo se formaría un ciclo. Valor 7 puntos
+
+func createsCycle(Grafo<int>: g,int: u,int: v): bool
+var
+    Array[1..N] of bool: visitados
+    int: i
+    bool: tieneCiclo 
+begin
+    tieneCiclo <- false
+    if(!g.existeVertice(u) || !g.existeVertice(v))then
+        return tieneCiclo
+    endif
+    g.insertarArco(u,v,0)
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- false
+    endfor
+    for i <- to g.getNVertices() do
+        if(!visitados[i])then
+            createsCycle(g,i,0,visitados,tieneCiclo)
+        endif
+    endfor
+    return tieneCiclo
+endfunc
+
+proc createsCycle(Grafo<int>: g,int: v,ref: int: padre,ref: Array[1..N] of bool: visitados,ref: bool: found)
+var
+    int: w 
+    Lista<int>: vecinos
+begin
+    visitados[v] <- true
+    vecinos <- g.getVecinos(v)
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            createsCycle(g,w,v,visitados)
+        else
+            if(w != padre)then
+                found <- true
+            endif
+        endif
+        vecinos.eliminar(1)
+    endwhile
+endproc

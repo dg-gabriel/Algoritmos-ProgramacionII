@@ -974,3 +974,82 @@ begin
     endwhile
     return nroComp
 endfunc
+
+
+Dado un grafo dirigido, implemente el Algoritmo de Tarjan para encontrar todas las componentes fuertemente conexas
+(SCC). Una SCC es un subconjunto donde cada nodo es alcanzable desde cualquier otro dentro del mismo subconjunto
+
+// asume grafo mapeado
+func tarjan(Grafo<int>: g): Lista<Lista<int>>
+var
+    Array[1..N] of bool: visitados,enPila
+    Array[1..N] of int: disc,low
+    Pila<int>: enCurso
+    Lista<Lista<int>>: result
+    int: i,pasos
+begin
+    result.construir()
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- false
+        enPila[i] <- false
+    endfor
+    pasos <- 0
+    for i <- 1 to g.getNVertices() do 
+        if(!visitados[i])then
+            tarjan(g,i,enCurso,visitados,enPila,disc,low,result)
+        endif
+    endfor
+    return result
+endfunc
+
+proc tarjan(Grafo<int>: g,int: v,ref: int: pasos,ref: Pila<int>: enCurso,ref: Array[1..N] of bool: visitados,ref: Array[1..N] of bool: enPila, ref: Array[1..N] of int: disc,ref: Array[1..N] of int: low,ref: Lista<Lista<int>: result)
+var
+    int: w,x
+    Lista<int>: vecinos,sublist
+begin
+    visitados[v] <- true
+    enCurso.apilar(v)
+    enPila[v] <- true
+    pasos <- pasos + 1
+    disc[v] <- pasos
+    low[v] <- pasos
+    vecinos <- g.getSucesores(v)
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            tarjan(g,w,pasos,enCurso,visitados,enPila,disc,low,result)
+            low[v] <- min(low[w],low[v])
+        endif
+        if(enPila[w])then
+            low[v] <- min(low[v], disc[w])
+        endif
+        vecinos.eliminar(1)
+    endwhile
+    if(low[v] = disc[v])then
+        sublist.construir()
+        x <- -1
+        while(x != v)do
+            x <- enCurso.getHead()
+            enPila[x] <- false
+            enCurso.desapilar()
+            sublist.insertar(x,sublist.getLength()+1)
+        endwhile
+        result.insertar(sublist,result.getLength()+1)
+    endif
+endproc
+
+
+Modele un sistema de gestión de proyectos como un DAG donde cada nodo es una tarea con nombre, duración
+estimada en horas y prioridad (1=alta, 2=media, 3=baja). Una arista A → B indica que A debe completarse antes que B
+
+proc SistemaProyectos::agregarTarea(nombre,duracion,prioridad)
+var
+    PointerToNodoVertice<Tarea> nuevaTarea
+    Tarea: t
+begin
+    t.nombre = nombre
+    t.duracion = duracion
+    t.prioridad = prioridad
+    nuevaTarea <- new(NodoVertice<Tarea>(t,instance.primero,NULL))
+    instance.primero = nuevaTarea
+endproc
