@@ -64,3 +64,50 @@ begin
         vecinos.eliminar(1)
     endwhile
 endproc
+
+// tiene exactamente el problema que suponia, busca en todo el grafo en lugar de buscar si u y v completan un ciclo,
+// puede dar falso positivo si hay otros ciclos en el grafo
+// lo correcto es hacer un dfs empezando desde u y si se encuentra a v, retornar true
+
+func createsCycle(Grafo<int>: g,int: u,v): bool
+var
+    bool: creaCiclo
+    Array[1..N] of bool: visitados
+    int: i
+begin
+    if(!g.existeVertice(u) || g.existeVertice(v))then
+        return false
+    endif
+    for i <- 1 to g.getNvertices() do
+        visitados[i] <- false
+    endfor
+    creaCiclo <- createsCycle(g,u,v,visitados)
+    return creaCiclo
+endfunc
+
+func createsCycle(Grafo<int>: g,int: origen,int: destino,ref: Array[1..N] of bool: visitados): bool
+var
+    Lista<int>: vecinos
+    Pila<int>: dfs
+    int: v,w
+begin
+    dfs.apilar(origen)
+    while(!dfs.esVacia())do
+        v <- dfs.desapilar()
+        if(!visitados[v])then
+            visitados[v] <- true
+            vecinos <- g.getVecinos(v)
+            while(!vecinos.esVacia())do
+                w <- vecinos.consultar(1)
+                if(w == destino)then
+                    return true
+                endif
+                if(!visitados[w])then
+                    dfs.apilar(w)
+                endif
+                vecinos.eliminar(1)
+            endwhile
+        endif
+    endwhile
+    return false
+endfunc

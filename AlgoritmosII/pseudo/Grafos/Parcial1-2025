@@ -1,0 +1,62 @@
+Desarrolle el metodo de la clase GrafoNoDirigido:
+proc GrafoNoDirigido<Elemento>::eliminarVertice(Elemento: v)
+Que elimine un vértice dado. USE SOLO PUNTEROS EN SU SOLUCIÓN. Su solución debe ser a lo
+sumo O(n+m). 
+
+proc GrafoNoDir<Element>::eliminarVertice(Element: v)
+var
+    PointerToNodoVertice<Element>: ptrV,act,ant
+    PointerToNodoArco<Element>: arcoAct,arcoAnt,arcoV
+begin
+    ant <- NULL
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = v)then
+            if(act = primero)then
+                ptrV = primero
+                act <- act^.getSiguiente()
+                primero <- primero^.getSiguiente()
+                ptrV^.setSiguiente(NULL)
+            else
+                ptrV = act
+                act <- act^.getSiguiente()
+                ant^.setSiguiente(act)
+                ptrV^.setSiguiente(NULL)
+            endif
+        endif
+        arcoAct <- act^.getListaAdy()
+        arcoAnt <- NULL
+        while(arcoAct)do
+            if(arcoAct^.getDestino()^.getInfo() = v)then
+                if(arcoAct = act^.getListaAdy())then
+                    arcoV <- arcoAct
+                    arcoAct <- actoAct^.getSiguiente()
+                    act^.setListaAdy(arcoAct)
+                    arcoV^.setSiguiente(NULL)
+                    delete arcoV
+                else
+                    arcoV <- arcoAct
+                    arcoAct <- arcoAct^.getSiguiente()
+                    arcoAnt^.setSiguiente(arcoAct)
+                    arcoV^.setSiguiente(NULL)
+                    delete arcoV
+                endif
+            endif
+            arcoAnt <- arcoAct
+            arcoAct <- arcoAct^.getSiguiente()
+        endwhile
+        ant <- act
+        act <- act^.getSiguiente()
+    endwhile
+    if(ptrV)then
+        arcoAnt <- ptrV^.getListaAdy()
+        arcoAct <- arcoAnt^.getSiguiente()
+        delete arcoAnt
+        while(arcoAct)do
+endproc
+
+// todo mal
+
+
+
+

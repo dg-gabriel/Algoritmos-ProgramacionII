@@ -133,6 +133,49 @@ void GrafoDir<Element>::insertarArco(Element v,Element w,float p){
     nArcos++;
 }
 
+template <class Element>
+list<Element> GrafoDir<Element>::getSucesores(Element v){
+    list<Element> res;
+    NodoVertice<Element> *ptrV = buscarVertice(v);
+    NodoArco<Element> *arcoV;
+    if(ptrV){
+        arcoV = ptrV->getListaAdy();
+        while(arcoV){
+            res.push_back(arcoV->getDestino()->getInfo());
+            arcoV = arcoV->getSiguiente()
+        }
+    }
+    return res;
+}
 
+// sucesores y vecinos
+
+template <class Element>
+bool GrafoDir<Element>::existeVertice(Element v){
+    return buscarVertice(v) != NULL;
+}
+
+template <class Element>
+bool GrafoDir<Element>::existeArco(Element v,Element w){
+    NodoVertice<Element> *ptrV = buscarVertice(v);
+    NodoVertice<Element> *ptrW = buscarVertice(w);
+    if(ptrV && ptrW){
+        return buscarArco(ptrv,ptrw) != NULL;
+    }
+    return false;
+}
+
+template <class Element>
+float GrafoDir<Element>::getCostoArco(Element v,Element w){
+    NodoVertice<Element> *ptrV = buscarVertice(v);
+    NodoVertice<Element> *ptrW = buscarVertice(w);
+    if(ptrV && ptrW){
+        NodoArco<Element> *ptrArco = buscarArco(ptrV,ptrW);
+        if(ptrArco){
+            return ptrArco->getPeso();
+        }
+    }
+    return -1;
+}
 
 #endif
