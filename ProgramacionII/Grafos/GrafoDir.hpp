@@ -21,7 +21,9 @@ class GrafoDir{
         NodoVertice<Element>* buscarVertice(const Element& v);                          // O(n)
         NodoArco<Element>* buscarArco(NodoVertice<Element>* v,NodoVertice<Element>* w); // O(arcos(v))
         void insertarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w,float p);  // O(1), auxiliar de insercion
-        bool eliminarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w);          // O(arcos(o)), retorna true si exisita el arco                            
+        bool eliminarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w);          // O(arcos(o)), retorna true si exisita el arco      
+        int vaciarListaArcos(NodoArco<Element>* lista);                                 // vacia la lista de ady y retorna cuantos borro
+        void copiarGrafo(const GrafoDir<Element>& target);                              // auxiliar para copiar un grafo                      
         
     public:
         GrafoDir();                                                             // O(1), constructor
@@ -100,6 +102,62 @@ bool GrafoDir<Element>::eliminarArcoAux(NodoVertice<Element>* o, NodoVertice<Ele
     return true;
 }
 
+template <class Element>
+int GrafoDir<Element>::vaciarListaArcos(NodoArco<Element>* lista){
+    int cont = 0;
+    NodoArco<Element> *sig,*act = lista;
+    while(act){
+        sig = act->getSiguiente();
+        delete act;
+        act = sig;
+        cont++;
+    }
+    return cont;
+}
+
+template <class Element>
+void GrafoDir<Element>::copiarGrafo(const GrafoDir<Element>& target){
+    primero = NULL;
+    map<NodoVertice<Element>*,NodoVertice<Element>*> mapa;
+    NodoVertice<Element>* viejo = target.primero;
+    NodoVertice<Element>* ult = NULL;
+
+    while(viejo){
+        NodoVertice<Element>* nuevo = new NodoVertice<Element>(viejo->getInfo(), NULL, NULL);
+        mapa[viejo] = nuevo;
+        if(!ult){
+            primero = nuevo;
+        }
+        else{
+            ult->setSiguiente(nuevo);
+        }
+        ult = nuevo;
+        viejo = viejo->getSiguiente();
+    }
+
+    viejo = target.primero;
+    while(viejo){
+        NodoVertice<Element>* nuevo = mapa[viejo];
+        NodoArco<Element>* arcoViejo = viejo->getListaAdy();
+        NodoArco<Element>* colaArco = NULL;
+        while(arcoViejo){
+            NodoVertice<Element>* destinoNuevo = mapa[arcoViejo->getDestino()];
+            NodoArco<Element>* arcoNuevo = new NodoArco<Element>(destinoNuevo, NULL, arcoViejo->getPeso());
+            if(!colaArco){
+                nuevo->setListaAdy(arcoNuevo);
+            }
+            else{
+                colaArco->setSiguiente(arcoNuevo);
+            }
+            colaArco = arcoNuevo;
+            arcoViejo = arcoViejo->getSiguiente();
+        }
+        viejo = viejo->getSiguiente();
+    }
+    nVertices = target.nVertices;
+    nArcos = target.nArcos;
+}
+
 /////////// Publicos ///////////
 
 template <class Element>
@@ -115,8 +173,23 @@ GrafoDir<Element>::GrafoDir(const GrafoDir<Element>& target){
 }
 
 template <class Element>
+GrafoDir<Element>::~GrafoDir(){
+    vaciar();
+}
+
+template <class Element>
+GrafoDir<Element>& GrafoDir<Element>::operator=(const GrafoDir<Element>& target){
+    if(this == &target){
+        return *this;
+    }
+    vaciar();
+    copiarGrafo(target);
+    return *this;
+}
+
+template <class Element>
 void GrafoDir<Element>::insertarVertice(Element v){
-    NodoVertice<Element> nuevo = new NodoVertice<Element>(v,primero,NULL);
+    NodoVertice<Element> *nuevo = new NodoVertice<Element>(v,primero,NULL);
     primero = nuevo;
     nVertices++;
 }
@@ -142,7 +215,7 @@ list<Element> GrafoDir<Element>::getSucesores(Element v){
         arcoV = ptrV->getListaAdy();
         while(arcoV){
             res.push_back(arcoV->getDestino()->getInfo());
-            arcoV = arcoV->getSiguiente()
+            arcoV = arcoV->getSiguiente();
         }
     }
     return res;
@@ -160,7 +233,7 @@ bool GrafoDir<Element>::existeArco(Element v,Element w){
     NodoVertice<Element> *ptrV = buscarVertice(v);
     NodoVertice<Element> *ptrW = buscarVertice(w);
     if(ptrV && ptrW){
-        return buscarArco(ptrv,ptrw) != NULL;
+        return buscarArco(ptrV,ptrW) != NULL;
     }
     return false;
 }

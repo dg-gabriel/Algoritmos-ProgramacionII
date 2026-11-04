@@ -57,6 +57,54 @@ endproc
 
 // todo mal
 
+proc GrafoNoDir<Element>::eliminarVertice(Element v)
+var
+    PointerToNodoVertice<Element> ptrW,act,ant
+    PointerToNodoArco<Element> arcoV,arcoW,arcoAnt,arcoAct
+begin
+    ant <- NULL
+    act <- instance.primero
+    while(act && act^.getInfo() != v)do
+        ant <- act
+        act <- act^.getSiguiente()
+    endwhile
+    if(!act)then
+        return
+    endif
+    if(act = primero)then
+        primero <- act^.getSiguiente()
+    else
+        ant^.setSiguiente(act^.getSiguiente())
+    endif
+    act^.setSiguiente(NULL)
+    arcoV <- act^.getListaAdy()
+    while(arcoV)do
+        arcoW <- arcoV^.getDestino()^.getListaAdy()
+        arcoAnt <- NULL
+        while(arcoW && arcoW^.getDestino()^.getInfo() != v)do
+            arcoAnt <- arcoW
+            arcoW <- arcoW^.getSiguiente()
+        endwhile
+        if(!arcoAnt)then
+            arcoV^.getDestino()^.setListaAdy(arcoW^.getSiguiente())
+        else
+            arcoAnt^.setSiguiente(arcoW^.getSiguiente())
+        endif
+        arcoW^.setSiguiente(NULL)
+        delete arcoW
+        arcoAnt <- arcoV
+        arcoV <- arcoV^.getSiguiente()
+        delete arcoAnt
+        nArcos--
+    endwhile
+    delete act
+    nVertices--
+endproc
+
+
+// coño de la madree olvido hacer delete al nodo al final
+
+
 
 
 
