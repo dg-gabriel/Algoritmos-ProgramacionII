@@ -1053,3 +1053,79 @@ begin
     nuevaTarea <- new(NodoVertice<Tarea>(t,instance.primero,NULL))
     instance.primero = nuevaTarea
 endproc
+
+
+
+
+// EJ. extras
+
+func Grafo<Element>::mapearGrafo(ref: Array[1..N] of Element: posiciones): Grafo<int>
+var 
+    PointerToNodoVertice<Element>: actViejo
+    PointerToNodoVertice<int>: nuevoVer,actNuevo
+    PointerToNodoArco<Element>: arcoAct
+    PointerToNodoArco<int>: nuevoArc
+    Grafo<int>: nuevoGrafo
+    int: i
+begin
+    nuevoGrafo.construir()
+    actViejo <- instance.primero
+    for i <- 1 to nVertices do
+        posiciones[i] <- actViejo^.getInfo()
+        actViejo <- actViejo^.getSiguiente()
+    endfor
+    for i <- nVertices in -1 to 1 do 
+        nuevoVer <- new(NodoVertice<int>)
+        nuevoVer^.construir(i,nuevoGrafo.primero,NULL)
+        nuevoGrafo.primero <- nuevoVer
+    endfor
+    actViejo <- instance.primero
+    actNuevo <- nuevoGrafo.primero
+    while(actViejo && actNuevo)do
+        arcoAct <- actViejo^.getListaAdy()
+        while(arcoAct)do
+            i <- buscarEnVector(posiciones,arcoAct^.getDestino()^.getInfo())
+            nuevoArc <- new(NodoArco<int>)
+            nuevoVer <- buscarVertice(nuevoGrafo,i)
+            nuevoArc^.construir(nuevoVer,actNuevo^.getListaAdy(),0)
+            actNuevo^.setListaAdy(nuevoArc)
+            arcoAct <- arcoAt^.getSiguiente()
+        endwhile
+        actViejo <- actViejo^.getSiguiente()
+        actNuevo <- actNuevo^.getSiguiente()
+    endwhile
+    nuevoGrafo.nVertices <- instance.nVertices
+    nuevoGrafo.nArcos <- instance.nArcos
+    return nuevoGrafo
+endfunc
+
+// N como longitud del arreglo
+func buscarEnVector(Array[1..N] of Element: arreglo,Element: v): int 
+var
+    int: i
+begin
+    for i <- 1 to N do
+        if(arreglo[i] = v)then
+            return i 
+        endif
+    endfor
+    return -1
+endfunc
+
+func buscarVertice(Grafo<int>: g,int: v): PointerToNodoVertice<int>
+var 
+    PointerToNodoVertice<int>: act 
+begin
+    act <- g.primero
+    while(act)do
+        if(act^.getInfo() = v)then
+            return act
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    return NULL
+endfunc
+
+// olvide avanzar el vertice
+// no se debe descartar el arreglo de posiciones porque sirve para hacer el desmapeo
+// nvertices y narcos falto asignarlos
