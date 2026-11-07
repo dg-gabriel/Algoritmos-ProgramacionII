@@ -53,10 +53,11 @@ class GrafoNoDir{
         list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad
         void vaciar();                                                          // O(n+m)
         // dijkstra
+        // prim/kruskal
         // tarjan para aristas puente
         // tarjan para puntos de articulacion
-        // tarjan para componentes fuertemente conexas
         // get nro componentes conexas
+        // tiene ciclo
         // mapear grafo
 };
 

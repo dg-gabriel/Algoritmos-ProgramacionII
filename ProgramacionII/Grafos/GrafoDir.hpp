@@ -47,6 +47,12 @@ class GrafoDir{
         int getNVertices();                                                     // O(1)
         int getNArcos();                                                        // O(1)
         void vaciar();                                                          // O(n+m)
+        // tarjan para componentes fuertemente conexas
+        // ordenamiento topologico (funciona solo en DAG)
+        // get nro componentes conexas
+        // tiene ciclo
+        // mapear grafo
+
 };
 
 //////////// Privados //////////

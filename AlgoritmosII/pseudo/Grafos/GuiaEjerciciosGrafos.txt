@@ -1087,9 +1087,9 @@ begin
             i <- buscarEnVector(posiciones,arcoAct^.getDestino()^.getInfo())
             nuevoArc <- new(NodoArco<int>)
             nuevoVer <- buscarVertice(nuevoGrafo,i)
-            nuevoArc^.construir(nuevoVer,actNuevo^.getListaAdy(),0)
+            nuevoArc^.construir(nuevoVer,actNuevo^.getListaAdy(),arcoAct^.getPeso())
             actNuevo^.setListaAdy(nuevoArc)
-            arcoAct <- arcoAt^.getSiguiente()
+            arcoAct <- arcoAct^.getSiguiente()
         endwhile
         actViejo <- actViejo^.getSiguiente()
         actNuevo <- actNuevo^.getSiguiente()
