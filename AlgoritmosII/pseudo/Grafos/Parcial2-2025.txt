@@ -29,3 +29,74 @@ begin
 endproc
             
             
+
+Dado un grafo G, NO DIRIGIDO, NO PONDERADO y mapeado. Cree la función:
+func getCaminoMasCortoArcos(Grafo<int>: g, int: v, w, int: intermedio): Lista<int>
+Que devuelva una lista de enteros con el camino más corto en arcos de v a w pero pasando
+OBLIGATORIAMENTE por el vértice intermedio. Su solución debe ser a lo sumo O(n+m).
+
+func getCaminoMasCortoArcos(Grafo<int>: g,int: v,w,intermedio): Lista<int>
+var
+    Lista<int>: resultA,resultB
+    int: i
+begin
+    resultA <- BFS(g,v,intermedio)
+    resultB <- BFS(g,intermedio,w)
+    if(!resultA.esVacia() && ! resultB.esVacia())then
+        resultB.eliminar(1)
+        resultA.concatenar(resultB)
+    else 
+        resultA.vaciar()
+    endif
+    return resultA
+endfunc
+
+func BFS(Grafo<int>: g,int: origen,int: destino): Lista<int>
+var
+    Lista<int>: result,vecinos
+    Array[1..N] of bool: visitados
+    Array[1..N] of int: padres
+    Cola<int>: colaAux
+    int: v,w,padre
+begin
+    result.construir()
+    for i <- 1 to g.getNvertices() do 
+        visitados[i] <- false
+    endfor
+    visitados[origen] <- true
+    padres[origen] <- 0
+    colaAux.encolar(origen)
+    while(!colaAux.esVacia() AND colaAux.getHead() != destino)do
+        v <- colaAux.getHead()
+        vecinos <- g.getVecinos(v)
+        while(!vecinos.esVacia())do
+            w <- vecinos.consultar(1)
+            if(!visitados[w])then
+                visitados[w] <- true
+                padres[w] <- v
+                colaAux.encolar(w)
+            endif
+            vecinos.eliminar(1)
+        endwhile
+        colaAux.desencolar()    
+    endwhile
+    if(!visitados[destino])then
+        return result
+    endif
+    v <- destino
+    while(v != 0)do
+        result.insertar(v,1)
+        v <- padres[v]
+    endwhile
+    return result
+endfunc
+
+
+
+
+
+
+// jaja nunca desencolas jaja ajaj 
+// mas optimo como condicion de while = !visitados[destino]
+// al concatenar A y B el intermedio se repite, debia eliminarse
+// si no llegaba al final, devoliva resultA a medias, debe vaciarse en tal caso 

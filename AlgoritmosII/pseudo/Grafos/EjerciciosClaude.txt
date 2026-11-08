@@ -1,0 +1,331 @@
+implementar proc GrafoNoDir<Element>::eliminarArco(Element: v,w) en O(n+m)
+
+proc GrafoNoDir<Element>::eliminarArco(Element: v,w)
+var
+    PointerToNodoVertice<Element>: ptrV,ptrW,act 
+begin
+    act <- instance.primero
+    while(act)do
+        if(act^.getInfo() = v)then
+            ptrV <- act
+        endif
+        if(act^.getInfo() = w)then
+            ptrW <- act
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(!ptrV || !ptrW)then
+        return
+    endif
+    eliminarArcoAux(ptrV,ptrW)
+    eliminarArcoAux(ptrW,ptrV)
+endproc
+
+proc eliminarArcoAux(PointerToNodoArco<Element>: v,w)
+var
+    PointerToNodoArco<Element>: ant,act
+    bool: rtBorrado
+begin
+    fueBorrado <- false
+    ant <- NULL
+    act <- v^.getListaAdy()
+    while(act AND !fueBorrado)do 
+        if(act^.getDestino() = w)then
+            if(ant)then
+                ant^.setSiguiente(act^.getSiguiente())
+            else
+                ant <- act^.getSiguiente()
+                v^.setListaAdy(ant)
+            endif
+            act^.setSiguiente(NULL)
+            delete act
+            fueBorrado <- true
+        else
+            ant <- act
+            act <- ant^.getSiguiente()
+        endif
+    endwhile
+endproc
+
+// ptrV y w no se inicializan en null
+// no actualizas nArcos
+// la funcion auxiliar no avisa si borro algo, deberia ser bool para retornar y decrementar el contador
+
+Desarrollar func GrafoDir<Element>::getGradoEntrada(Element v): int que devuelve cuantos vertices 
+tienen una arista que apunte a v, O(n+m)
+
+func GrafoDir<Element>::getGradoEntrada(Element v): int
+var
+    PointerToNodoVertice<Element>: act,dest 
+    PointerToNodoArco<Element>: arcoAct 
+    int: cont 
+begin
+    dest <- NULL
+    cont <- 0
+    act <- instance.primero
+    while(act && !dest)do
+        if(act^.getInfo() = v)then
+            dest <- act
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(!dest)then
+        return cont
+    endif
+    act <- instance.primero
+    while(act)do
+        arcoAct <- act^.getListaAdy()
+        while(arcoAct)do
+            if(arcoAct^.getDestino() = dest)then
+                cont <- cont + 1
+            endif
+            arcoAct <- arcoAct^.getSiguiente()
+        endwhile
+        act <- act^.getSiguiente()
+    endwhile
+    return cont 
+endfunc
+
+ejercicio de la clase "En una red de carreteras dirigidas se desea identificar todas las ciudades 
+desde las cuales es posible llegar a una ciudad destino respetando la direccion de las vias, restriccion O(n+m)
+
+// el grafo se da mapeado, y es dirigido
+func getCiudadesADestino(Grafo<int>: g,int: destino): Lista<int>
+var
+    Lista<Lista<int>>: arcos 
+    Lista<int>: sucesores,result 
+    Cola<int>: colaAux
+    Array[1..n] of bool: visitados 
+    int: v,w,i
+begin
+    // invertir arcos 
+    arcos <- g.getArcos(true)
+    while(!arcos.esVacia())do
+        v <- arcos.consultar(1).consultar(1)
+        w <- arcos.consultar(1).consultar(2)
+        g.eliminarArco(v,w)
+        g.insertarArcoDirigido(w,v,0)
+        arcos.eliminar(1)
+    endwhile
+    for i <- 1 to g.getNvertices() do 
+        visitados[i] <- false
+    endfor
+    colaAux.construir()
+    result.construir()
+    colaAux.encolar(destino)
+    while(!colaAux.esVacia())
+        v <- colaAux.getHead()
+        sucesores <- g.getSucesores(v)
+        while(!sucesores.esVacia())do
+            w <- sucesores.consultar(1)
+            if(!visitados[w])then
+                colaAux.encolar(w)
+                result.insertar(w,result.getLength()+1)
+                visitados[w] <- true 
+            endif
+            sucesores.eliminar(1)
+        endwhile
+        colaAux.desencolar()
+    endwhile
+    return result
+endfunc
+
+simulacro 1
+
+1. (10 pts) Desarrolle el método de la clase GrafoNoDirigido:
+
+proc GrafoNoDirigido<Elemento>::eliminarAislados()
+
+Elimina todos los vértices aislados (sin ningún arco). USE SOLO PUNTEROS.
+
+proc GrafoNoDir<Element>::eliminarAislados()
+var
+    PointerToNodoVertice<Element>: act,ant
+    PointerToNodoArco<Element>: arcoAct 
+begin
+    ant <- NULL 
+    act <- instance.primero
+    while(act)do
+        arcoAct <- act.getListaAdy()
+        if(!arcoAct)then
+            if(ant)then
+                ant^.setSiguiente(act^.getSiguiente())
+                act^.setSiguiente(NULL)
+                delete act
+                act <- ant
+                act <- act^.getSiguiente()
+            else
+                ant <- act^.setSiguiente()
+                act^.setSiguiente(NULL)
+                delete act
+                act <- ant 
+                ant <- NULL
+            endif
+        else
+            ant <- act 
+            act <- act^.getSiguiente()
+        endif
+    endwhile
+endproc
+
+// borras y despues asignas en el primer caso, en el caso donde es el primero no actualizas instance.primero
+// no actualizas n vertices 
+
+2. (10 pts) Dado un grafo G no dirigido y mapeado, cree la función:
+
+func getTamanoComponenteMayor(Grafo<int>: g): int
+
+Devuelve la cantidad de vértices de la componente conexa más grande. Debe ser a lo sumo O(n+m)
+
+func getTamanoMayorComp(Grafo<int>: g): int 
+var 
+    int: i,cont,max
+    Array[1..n] of bool: visitados
+begin
+    if(g.esNulo())then
+        return 0
+    endif
+    max <- -1
+    for i <- 1 to g.getNvertices() do 
+        visitados[i] <- false
+    endfor
+    for i <- 1 to g.getNvertices() do 
+        if(!visitados[i])then
+            cont <- BFS(g,i,visitados)
+            if(cont > max)then
+                max <- cont 
+            endif
+        endif
+    endfor
+    return max
+endfunc
+        
+func BFS(Grafo<int>: g,int: origen,ref: Array[1..N] of bool: visitados): int 
+var 
+    int: cont,v,w
+    Lista<int>: vecinos
+    Cola<int>: cola
+begin
+    cont <- 0
+    visitados[origen] <- true
+    cola.encolar(origen)
+    while(!cola.esVacia())do
+        v <- cola.getHead()
+        cont <- cont + 1
+        vecinos <- g.getVecinos(v)
+        while(!vecinos.esVacia())do
+            w <- vecinos.consultar(1)
+            if(!visitados[w])then
+                visitados[w] <- true
+                cola.encolar(w)
+            endif
+            vecinos.eliminar(1)
+        endwhile
+        cola.desencolar()
+    endwhile
+    return cont 
+endfunc
+
+
+
+1. (10 pts) Desarrolle el método de la clase GrafoDirigido:
+proc GrafoDirigido<Elemento>::eliminarVertice(Elemento: v)
+Elimina el vértice v y todos los arcos que entran o salen de él. USE SOLO PUNTEROS. 
+
+proc GrafoDir<Element>::eliminarVertice(Element: v)
+var 
+    PointerToNodoVertice<Element>: act,antV,ptrV
+    PointerToNodoArco<Element>: arcoAct,arcoSig
+begin
+    antV <- NULL 
+    act <- instance.primero
+    while(act && !ptrV)do
+        if(act^.getInfo() = v)then
+            ptrV <- act 
+        endif
+        antV <- act 
+        act <- act^.getSiguiente()
+    endwhile
+    if(!ptrV)then
+        return
+    endif
+    act <- instance.primero
+    while(act)do
+        if(act != ptrV)then
+            arcoAct <- act^.getListaAdy()
+            while(arcoAct)do
+                if(arcoAct^.getDestino() = ptrV)then
+                    eliminarArco(act,ptrV)
+                endif
+                arcoAct <- arcoAct^.getSiguiente()
+            endwhile
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(antV)then
+        antV^.setSiguiente(ptrV^.getSiguiente())
+    else
+        instance.primero <- ptrV^.getSiguiente()
+    endif
+    ptrV^.setSiguiente(NULL)
+    arcoAct <- ptrV^.getListaAdy()
+    while(arcoAct)do
+        arcoSig <- arcoAct^.getSiguiente()
+        delete arcoAct
+        arcoAct <- arcoSig
+    endwhile
+endproc
+
+proc GrafoDir<Element>::eliminarArcoAux(PointerToNodoArco<Element>: v,w)
+var
+    PointerToNodoArco<Element>: ant,act
+    bool: fueBorrado
+begin
+    fueBorrado <- false
+    ant <- NULL
+    act <- v^.getListaAdy()
+    while(act AND !fueBorrado)do 
+        if(act^.getDestino() = w)then
+            if(ant)then
+                ant^.setSiguiente(act^.getSiguiente())
+            else
+                ant <- act^.getSiguiente()
+                v^.setListaAdy(ant)
+            endif
+            act^.setSiguiente(NULL)
+            delete act
+            fueBorrado <- true
+        else
+            ant <- act
+            act <- ant^.getSiguiente()
+        endif
+    endwhile
+endproc
+
+
+func getVerticesADistancia(Grafo<int>: g, int: v, int: k): Lista<int>
+Devuelve todos los vértices cuya distancia mínima en arcos desde v es exactamente k. Debe ser a lo sumo O(n+m).
+
+func getVerticesADistancia(Grafo<int>: g,int: v,k): Lista<int>
+var
+    Array[1..n] of bool: visitados
+    Lista<int>: result
+    int: i
+begin
+    for i <- 1 to g.getNVertices() do
+        visitados[i] <- false
+    endfor
+    result <- BFS(g,v,k,visitados)
+    return result 
+endfunc
+
+func BFS(Grafo<int>: g,int: origen,k,Array[1..n] of bool: visitados): Lista<int>
+var
+    Lista<int>: result,vecinos
+    Cola<int>: cola
+    int: v,w,i
+begin
+    visitados[i] <- true
+    cola.encolar(origen)
+    while(!cola.esVacia())do
+        
