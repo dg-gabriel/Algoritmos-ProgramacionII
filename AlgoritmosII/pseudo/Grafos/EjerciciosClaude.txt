@@ -446,9 +446,11 @@ begin
         visitados[i] <- false
     endfor
     cola.construir()
+    //visitados[origen] <- true
     cola.encolar(origen)
     while(!cola.esVacia())do
         v <- cola.getHead()
+        // vecinos <- g.getVecinos(v)
         vecinos <- vecinos.getHead()
         while(!vecinos.esVacia())do
             w <- vecinos.consultar(1)
@@ -456,6 +458,7 @@ begin
                 if(w = destino)then
                     return true
                 else
+                //visitados[w] <- true
                 cola.encolar(w)
             endif
             vecinos.eliminar(1)
@@ -465,6 +468,55 @@ begin
     return false
 endfunc
 
+// nunca marcaste visitado maquina q mierda t pasa
+// no inicializaste vecinos tampoco loco 
+
 2. (13 pts) Dado un grafo G no dirigido y mapeado, cree la función:
 func esArbol(Grafo<int>: g): bool
 Determina si G es un árbol (conexo y sin ciclos). Debe ser a lo sumo O(n+m)
+
+func esArbol(Grafo<int>: g): bool
+var
+    Array[1..N] of bool: visitados
+    bool: tieneCiclo,esConexo
+    int: nroComp
+begin
+    for i <- 1 to g.getNvertices() do
+        visitados[i] <- false
+    endfor
+    tieneCiclo <- false
+    esConexo <- false
+    nroComp <- 0
+    for i <- 1 to g.getNVertices() do 
+        if(!visitados[i])then
+            DFS(g,i,0,visitados,tieneCiclo)
+            nroComp <- nroComp + 1
+        endif
+    endfor
+    if(nroComp = 1)then
+        esConexo <- true
+    endif
+    return esConexo && !tieneCiclo
+endfunc
+
+proc DFS(Grafo<int>: g,int: v,padre,ref: Array[1..N] of bool: visitados,ref: bool: tieneCiclo)
+var
+    Lista<int>: vecinos
+    int: w
+begin
+    visitados[v] <- true
+    vecinos <- g.getVecinos(v)
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            DFS(g,v,w,visitados,tieneCiclo)
+        else
+            if(w != padre)then
+                tieneCiclo <- true
+            endif
+        endif
+        vecinos.eliminar(1)
+    endwhile
+endproc
+
+// la llamada recursiva tiene al reves el orden llamas padre hijo no hijo padre

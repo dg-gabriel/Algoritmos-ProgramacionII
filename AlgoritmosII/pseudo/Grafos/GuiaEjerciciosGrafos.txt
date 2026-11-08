@@ -996,7 +996,7 @@ begin
     pasos <- 0
     for i <- 1 to g.getNVertices() do 
         if(!visitados[i])then
-            tarjan(g,i,enCurso,visitados,enPila,disc,low,result)
+            tarjan(g,i,pasos,enCurso,visitados,enPila,disc,low,result)
         endif
     endfor
     return result
