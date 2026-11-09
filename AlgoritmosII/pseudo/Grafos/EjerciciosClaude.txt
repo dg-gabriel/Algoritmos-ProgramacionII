@@ -520,3 +520,151 @@ begin
 endproc
 
 // la llamada recursiva tiene al reves el orden llamas padre hijo no hijo padre
+
+
+Simulacro D (calentamiento y primer giro)
+1. (8 pts) func GrafoNoDirigido<Elemento>::getVerticeMayorGrado(): Elemento
+Retorna el elemento del vértice con más vecinos. Si hay empate, el que aparezca primero en la lista. USE SOLO PUNTEROS. Sin cota de complejidad.
+
+func GrafoNoDir<Element>::getVerticeMayorGrado(): Element 
+var 
+    PointerToNodoVertice<Element>: act 
+    PointerToNodoArco<Element>: arcoAct
+    int: mayorGrado,cont 
+    Element: v 
+begin
+    mayorGrado <- -1 
+    act <- instance.primero()
+    while(act)do
+        cont <- 0
+        arcoAct <- act^.getListaAdy()
+        while(arcoAct)do 
+            cont <- cont + 1
+            arcoAct <- arcoAct^.getSiguiente()
+        endwhile
+        if(cont > mayorGrado)then
+            mayorGrado <- cont 
+            v <- act^.getInfo()
+        endif
+        act <- act^.getSiguiente()
+    endwhile
+    if(mayorGrado != -1)then
+        return v
+    endif
+    // no se que retornar en element como 'nulo'
+endfunc
+
+func esBipartito(Grafo<int>: g): bool
+Determina si los vértices se pueden dividir en dos grupos tales que todo arco conecta vértices de grupos distintos. O(n+m). Considera que G puede no ser conexo.
+
+func esBipartito(Grafo<int>: g): bool 
+var 
+    int: i,j,w
+    Lista<int>: vecinosV,vecinosW
+begin
+    for i <- 1 to g.getNvertices() do 
+        vecinos <- g.getVecinos(i)
+        for j <- 1 to vecinos.getLength() do 
+            w <- vecinos.consultar(i)
+            vecinosW <- g.getVecinos(w)
+            if(buscarElementoComun(vecinosV,vecinosW))then
+                return false 
+            endif
+        endfor
+    endfor
+    return true
+endfunc
+
+// buscarElementoComun(Lista<int>: a,b): bool es una funcion supuesta que retorna true si encuentra
+// un elemento que exista en ambas listas
+
+// malisimo ermano
+// bfs coloreando vertices y borralo
+
+func esBipartito(Grafo<int>: g): bool
+var
+    Array[1..n] of int: colores
+    Lista<int>: vecinos
+    Cola<int>: cola
+    int: i,v,w 
+begin
+    for i <- 1 to g.getNVertices() do 
+        colores[i] <- -1
+    endfor
+    cola.construir()
+    for i <- 1 to g.getNVertices() do
+        if(colores[i] = -1)then
+            cola.encolar(i)
+            colores[i] <- 1
+            while(!cola.esVacia())do
+                v <- cola.getHead()
+                vecinos <- g.getVecinos(v)
+                while(!vecinos.esVacia())do
+                    w <- vecinos.consultar(1)
+                    if(colores[w] = -1)then
+                        if(colores[v] = 1)then
+                            colores[w] <- 2
+                        else
+                            colores[w] <- 1
+                        endif
+                        cola.encolar(w)
+                    else
+                        if(colores[v] = colores[w])then
+                            return false
+                        endif
+                    endif
+                    vecinos.eliminar(1)
+                endwhile
+                cola.desencolar()
+            endwhile
+        endif
+    endfor
+    return true
+endfunc 
+
+
+
+2. (10 pts) Dado un grafo G no dirigido, no ponderado y mapeado:
+func getCaminoEvitando(Grafo<int>: g, int: v, w, prohibido): Lista<int>
+Camino más corto en arcos de v a w que no pase por el vértice prohibido. Lista vacía si no existe. O(n+m).
+
+func getCaminoEvitando(Grafo<int>: g,int: origen,destino,prohibido)
+var
+    Array[1..n] of int: padres
+    Cola<int>: cola 
+    Lista<int>: vecinos,result
+    int: i,v,w 
+begin
+    for i <- 1 to g.getNVertices() do 
+        padres[i] <- -1
+    endfor
+    result.construir()
+    cola.construir()
+    padres[origen] <- 0
+    cola.encolar(origen)
+    while(!cola.esVacia())do
+        v <- cola.getHead()
+        if(v = destino)then
+            break
+        endif
+        vecinos <- g.getVecinos(v)
+        while(!vecinos.esVacia())do
+            w <- vecinos.consultar(1)
+            if(padres[w] = -1 AND w != prohibido)then
+                padres[w] <- v 
+                cola.encolar(w)
+            endif
+            vecinos.eliminar(1)
+        endwhile
+        cola.desencolar()
+    endwhile
+    if(padres[destino] != -1)then
+        i <- destino 
+        while(padres[i] != 0)do 
+            result.insertar(i,1)
+            i <- padres[i]
+        endwhile
+        result.insertar(origen,1)
+    endif
+    return result
+endfunc
