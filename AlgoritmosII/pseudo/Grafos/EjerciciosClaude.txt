@@ -624,6 +624,64 @@ endfunc
 
 
 
+1. (10 pts) 🧩 Dado un grafo G no dirigido y mapeado:
+func esConexoSinVertice(Grafo<int>: g, int: x): bool
+Determina si G seguiría siendo conexo si se eliminara el vértice x. No se puede modificar g. O(n+m). Decide y anota qué devuelves si el grafo queda con 0 o 1 vértices
+
+// se asume un grafo conexo 
+func esConexoSinVertice(Grafo<int>: g,int: x): bool
+var
+    Array[1..n] of int: costos,visitados
+    Lista<int>: vecinosX,vAux
+    int: i,w,cont
+begin
+    if(g.getNVertices() <= 1)then
+        return false
+        // se decide que un grafo con 0 vertices no puede ser conexo
+    endif
+    for i <- 1 to g.getNVertices() do 
+        visitados[i] <- 0
+    endfor
+    visitados[x] <- -1
+    cont <- 0
+    for i <- 1 to g.getNVertices() do 
+        if(visitados[i] = 0)then
+            BFS(g,i,visitados)
+            cont <- cont + 1
+        endif
+    endfor
+    if(cont > 1)then
+        return false
+    endif
+    return true
+endfunc
+
+proc BFS(Grafo<int>: g,int: origen, ref: Array[1..n] of int: visitados)
+var
+    Lista<int>: vecinos
+    Cola<int>: cola
+    int: v,w 
+begin
+    visitados[origen] <- 1
+    cola.encolar(origen)
+    while(!cola.esVacia())do
+        v <- cola.getHead()
+        vecinos <- g.getVecinos(v)
+        while(!vecinos.esVacia())do
+            w <- vecinos.consultar(1)
+            if(visitados[w] = 0)then
+                visitados[w] <- 1
+                cola.encolar(w)
+            endif
+            vecinos.eliminar(1)
+        endwhile
+        cola.desencolar()
+    endwhile
+endproc
+
+//muchacho no hacia falta eliminar el vertice con el BFS poniendo visitado[x] en -1 te daba para 
+//saber si el grafo era conexo ignorando ese vertice 
+
 2. (10 pts) Dado un grafo G no dirigido, no ponderado y mapeado:
 func getCaminoEvitando(Grafo<int>: g, int: v, w, prohibido): Lista<int>
 Camino más corto en arcos de v a w que no pase por el vértice prohibido. Lista vacía si no existe. O(n+m).
@@ -668,3 +726,216 @@ begin
     endif
     return result
 endfunc
+
+
+1. (7 pts) Dado un grafo G no dirigido y mapeado:
+func aristasParaConectar(Grafo<int>: g): int
+Mínimo de aristas que hay que agregar para que G sea conexo. O(n+m). 
+
+func aristasParaConectar(Grafo<int>: g): int
+var 
+    Array[1..n] of bool: visitados
+    Cola<int>: cola 
+    Lista<int>: vecinos
+    int. i,v,w,nroComp
+begin
+    for i <- 1 to g.getNVertices() do 
+        visitados[i] <- false 
+    endfor 
+    cola.construir()
+    nroComp <- o
+    for i <- 1 to g.getNVertices() do 
+        if(!visitados[i])then
+            cola.encolar(i)
+            visitados[i] <- true
+            while(!cola.esVacia())do
+                v <- cola.getHead()
+                vecinos <- g.getVecinos(v)
+                while(!vecinos.esVacia())do
+                    w <- vecinos.consultar(1)
+                    if(!visitados[w])then
+                        visitados[w] <- true 
+                        cola.encolar(w)
+                    endif
+                    vecinos.eliminar(1)
+                endwhile
+                cola.desencolar()
+            endwhile
+            nroComp <- nroComp+1
+        endif
+    endfor
+    if(nroComp > 0)then
+        return nroComp - 1
+    endif
+    return 0
+endfunc
+
+
+
+Pregunta 1 (Valor: 10 puntos) Desarrolle el método de la clase GrafoDirigido: 
+proc GrafoDirigido<Element>::keepOnlyBidirectional() 
+Que modifique el grafo instancia eliminando todos aquellos arcos (u,v) que no posean su arco recíproco (v,u) en el grafo. 
+Al finalizar, en el grafo solo deben permanecer los pares de arcos que sean mutuamente simétricos. 
+USE SOLO APUNTADORES EN SU SOLUCIÓN Complejidad exigida: O(n+mk) (donde k es el grado máximo de salida)
+
+
+proc GrafoDirigido<Element>::keepOnlyBidirectional() 
+Que modifique el grafo instancia eliminando todos aquellos arcos (u,v) que no posean su arco recíproco (v,u) en el grafo. Al finalizar, en el grafo solo deben permanecer los pares de arcos que sean mutuamente simétricos. USE SOLO APUNTADORES EN SU SOLUCIÓN Complejidad exigida: O(n+mk) (donde k es el grado máximo de salida)
+
+proc GrafoDir<Element>::keepOnlyBidirectional()
+var 
+    PointerToNodoVertice<Element> u,v 
+    PointerToNodoArco<Element>: arcoU,arcoV,arcoAnt
+    bool: found 
+begin
+    u <- instance.primero
+    while(u)do 
+        arcoAnt <- NULL
+        arcoU <- u^.getListaAdy()
+        while(arcoU)do
+            v <- arcoU^.getDestino()
+            arcoV <- v^.getListaAdy()
+            found <- false 
+            while(arcoV AND !found)do 
+                if(arcoV^.getDestino() = u)then
+                    found <- true 
+                else 
+                    arcoV <- arco^.getSiguiente()
+                endif 
+            endwhile
+            if(!found)then
+                eliminarArco(arcoAnt,arcoU,u)
+            else 
+                arcoAnt <- arcoU 
+                arcoU <- arcoU^.getSiguiente()
+            endif 
+        endwhile
+        u <- u^.getSiguiente()
+    endwhile
+endproc
+
+proc GrafoDir<Element>::eliminarArco(PointerToNodoArco<Element>: ant,act,PointerToNodoVertice<Element>: u)
+var 
+    PointerToNodoArco<Element>: arcoSig 
+begin 
+    arcoSig <- act^.getSiguiente()
+    if(ant)then
+        ant^.setSiguiente(arcoSig)
+    else 
+        u^.setListaAdy(arcoSig)
+    endif 
+    act^.setSiguiente(NULL)
+    delete act 
+    nArcos <- nArcos - 1 
+    act <- arcoSig
+endproc
+
+// error grave aca, no pasas por referencia los punteros arco a la funcion auxiliar, se pierde el hilo del recorrido
+// en la main
+
+Pregunta 2 (Valor: 7 puntos) Dado un grafo G dirigido, no ponderado y mapeado (1..n), 
+cree la función externa: func findUniversalSink(Grafo<int>: g): int 
+Un sumidero universal (universal sink) es un vértice k que cumple simultáneamente dos condiciones: 
+todos los demás n-1 vértices del grafo tienen un arco directo hacia k (grado de entrada n-1), 
+y k no tiene ningún arco saliente (grado de salida 0). 
+Si existe dicho vértice, retorne su identificador (1..n); en caso contrario, retorne -1. 
+Restricción: NO DEBE USAR APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+func findUniversalSink(Grafo<int>: g): int 
+var 
+    Array[1..n] of bool: visitados 
+    Array[1..n] of int: adyacencias 
+    Lista<int>: sucesores 
+    Cola<int>: cola 
+    int: i,v,w 
+begin 
+    for i <- 1 to g.getNVertices() do 
+        visitados[i] <- false 
+        adyacencias[i] <- 0
+    endfor 
+    cola.construir()
+    for i <- 1 to g.getNVertices() do 
+        if(!visitados[i])then 
+            visitados[i] <- true 
+            cola.encolar(i)
+            while(!cola.esVacia())do 
+                v <- cola.getHead()
+                sucesores <- g.getSucesores(v)
+                while(!sucesores.esVacia())do
+                    w <- sucesores.consultar(1)
+                    adyacencias[w] <- adyacencias[w] + 1 
+                    if(!visitados[w])then
+                        visitados[w] <- true 
+                        cola.encolar(w)
+                    endif 
+                    sucesores.eliminar(1)
+                endwhile
+                cola.desencolar()
+            endwhile 
+        endif 
+    endfor 
+    for i <- 1 to g.getNVertices() do 
+        if(adyacencias[i] = g.getNVertices - 1)then
+            if(g.getSucesores(i).esVacia())then
+                return i 
+            endif 
+        endif 
+    endfor
+    return -1 
+endfunc
+
+Pregunta 1 (Valor: 10 puntos)
+Desarrolle el método de la clase GrafoDirigido: proc GrafoDirigido<Element>::redirectAndRemove(Element: u, Element: v) Suponga que en el grafo el vértice u no tiene arcos salientes ni entrantes actualmente (acaba de ser insertado como reemplazo de v), o que se permite transferir la vecindad directamente. Transfiera todos los arcos salientes de v hacia u (excluyendo posibles arcos hacia sí mismo), redirija todos los arcos entrantes del grafo que apuntaban a v para que ahora apunten a u (eliminando cualquier bucle (u,u) que esto genere), y finalmente desenganche y elimine el vértice v del grafo.
+Restricción: USE SOLO APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+// se asume que ptrU es el primero ya que fue recien insertado
+proc GrafoDir<Element>::redirectAndRemove(Element: u,v)
+var 
+    PointerToNodoVertice<Element>: act,ant,antV,ptrV,ptrU 
+    PointerToNodoArco<Element>: arcoAct,arcoAnt,arcoSig
+begin
+    ptrU <- instance.primero 
+    ant <- ptrU 
+    act <- ptrU^.getSiguiente()
+    while(act)do 
+        if(act^.getInfo() = v)then
+            ptrU^.setListaAdy(act^.getListaAdy())
+            ptrV <- act
+            antV <- ant
+        else 
+            arcoAct <- act^.getListaAdy()
+            while(arcoAct)do 
+                if(arcoAct^.getDestino() = ptrV)then
+                    arcoAct^.setDestino(ptrU)
+                endif
+                arcoAct <- arcoAct^.getSiguiente()
+            endwhile
+        endif
+        ant <- act
+        act <- act^.getSiguiente()
+    endwhile
+    arcoAct <- NULL 
+    arcoAct <- ptrU^.getListaAdy()
+    while(arcoAct)do 
+        arcoSig <- arcoAct^.getSiguiente()
+        if(arcoAct^.getDestino() = ptrU)then
+            if(arcoAct)then
+                arcoAct^.setSiguiente(arcoSig)
+            else
+                ptrU^.setListaAdy(arcoSig)
+            endif
+            arcoAct^.setSiguiente(NULL)
+            nArcos <- nArcos - 1
+            delete arcoAct 
+            arcoAct <- arcoSig
+        else
+            arcoAnt <- arcoAct
+            arcoAct <- arcoSig
+        endif
+    endwhile
+    ptrV^.setListaAdy(NULL)
+    antV^.setSiguiente(ptrV^.getSiguiente())
+    ptrV^.setSiguiente(NULL)
+    delete ptrV
+    nVertices <- nVertices - 1
+endproc
