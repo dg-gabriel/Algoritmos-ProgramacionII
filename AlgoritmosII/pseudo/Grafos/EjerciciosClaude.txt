@@ -939,3 +939,200 @@ begin
     delete ptrV
     nVertices <- nVertices - 1
 endproc
+
+
+1. (10 pts) Desarrolle el método de la clase Grafo:proc Grafo<Element>::eliminarArco(Element: v, Element: w) 
+Que elimine el arco que va desde el vértice v hacia el vértice w (considere el atributo instance.esDirigido). 
+USE SOLO APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+grado(v)+grado(w)).
+
+// correccion de enunciado segun las convenciones del semestre 
+// eliminar arco no cambia dependiendo de la direccion o no direccion del grafo 
+// las funciones que usen eliminar arco en un no dirigod simplemente lo llamaran dos veces 
+proc Grafo<int>::eliminarArco(Element: v,w)
+var 
+    PointerToNodoVertice<Element>: act 
+    PointerToNodoArco<Element>: arcoAct,arcoAnt,arcoSig
+    bool: found 
+begin 
+    found <- false 
+    act <-instance.primero
+    while(act AND !found)do 
+        if(act^.getInfo() = v)then
+            arcoAct <- act^.getListaAdy()
+            arcoAnt <- NULL 
+            while(arcoAct)do 
+                arcoSig <- arcoAct^.getSiguiente()
+                if(arcoAct^.getDestino()^.getInfo() = w)then 
+                    if(arcoAnt)then
+                        arcoAnt^.setSiguiente(arcoSig)
+                    else 
+                        act^.setListaAdy(arcoSig)
+                    endif 
+                    arcoAct^.setSiguiente(NULL)
+                    delete arcoAct
+                    nArcos <- nArcos - 1 
+                    arcoAct <- arcoSig
+                    found <- true 
+                else 
+                    arcoAnt <- arcoAct
+                    arcoAct <- arcoSig
+                endif
+            endwhile
+        endif 
+        act <- act^.getSiguiente()
+    endwhile
+endproc
+
+
+
+2. (7 pts) Dado un grafo G no dirigido, no ponderado y mapeado (1..n), un vértice inicial v y un entero k (k1), 
+cree la función:func nodosADistanciaExacta(Grafo<int>: g, int: v, int: k): Lista<int> 
+Que retorne una lista con todos los vértices cuya distancia mínima (en número de aristas) desde v sea exactamente igual a k. 
+NO DEBE USAR APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+func nodosADistanciaExacta(Grafo<int>: g,int: origen,k): Lista<int>
+var 
+    Lista<int>: result,vecinos 
+    Array[1..n] of bool: visitados 
+    Array[1..n] of int> distancias 
+    int: i,v,w 
+    Cola<int>: cola 
+begin 
+    for i <- 1 to g.getNVertices() do 
+        visitados[i] <- false 
+        distancias[i] <- 0
+    endfor 
+    result.construir()
+    cola.construir()
+    visitados[origen] <- true 
+    cola.encolar(origen)
+    while(!cola.esVacia())do 
+        v <- cola.getHead()
+        vecinos <- g.getVecinos(v)
+        while(!vecinos.esVacia())do 
+            w <- vecinos.consultar(1)
+            if(!visitados[w])then 
+                visitados[w] <- true 
+                distancias[w] <- distancias[v] + 1 
+                if(distancias[w] = k)then
+                    result.insertar(w,result.getLength()+1)
+                endif 
+            endif 
+            vecinos.eliminar(1)
+        endwhile 
+        cola.desencolar()
+    endwhile
+    return result
+endfunc
+
+
+implementar el metodo getArcos()
+
+func Grafo<int>::getArcos(bool: esDirigido): Lista<Lista<Element>>
+var 
+    PointerToNodoVertice<Element>: act
+    PointerToNodoArco<Element>: arcoAct 
+    Lista<Lista<Element>>: result 
+    Lista<Element>: sublist 
+begin 
+    result.construir()
+    act <- instance.primero 
+    while(act)do 
+        arcoAct <- act^.getListaAdy()
+        while(arcoAct)do 
+            if(esDirigido)then
+                sublist.construir()
+                sublist.insertar(act^.getInfo(),1)
+                sublist.insertar(arcoAct^.getInfo().getDestino(),2)
+                result.insertar(sublist,result.getLength())
+            else 
+                if(act^.getInfo() < arcoAct^.getDestino^.getInfo())then
+                    sublist.construir()
+                    sublist.insertar(act^.getInfo(),1)
+                    sublist.insertar(arcoAct^.getInfo().getDestino(),2)
+                    result.insertar(sublist,result.getLength())
+                endif 
+            endif
+            arcoAct <-arcoAct^.getSiguiente()
+        endwhile
+        act <- act^.getSiguiente()
+    endwhile 
+    return result
+endfunc 
+
+
+
+1. (10 pts) Desarrolle el método de la clase GrafoDirigido:func GrafoDirigido<Element>::getPredecesores(Element: v): Lista<Element> 
+Que retorne una lista con todos los vértices u tales que exista un arco dirigido desde u hacia v. 
+Si el vértice v no existe en el grafo, debe retornar una lista vacía. 
+USE SOLO APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+func Grafo<Element>::getPredecesores(Element: v)
+var 
+    PointerToNodoVertice<Element>: act 
+    PointerToNodoArco<Element>: arcoAct
+    Lista<Element>: result 
+begin 
+    result.construir()
+    act <- instance.primero 
+    while(act)do
+        if(act^.getInfo() != v)then 
+            arcoAct <- act^.getListaAdy()
+            while(arcoAct)do 
+                if(arcoAct^.getDestino()^.getInfo() = v)then 
+                    result.insertar(act^.getInfo(),result.getLength()+1)
+                endif 
+                arcoAct <- arcoAct^.getSiguiente()
+            endwhile 
+        endif 
+        act <- act^.getSiguiente()
+    endwhile 
+    return result 
+endfunc 
+
+
+2. (10 pts) Dado un grafo G no dirigido, conexo y mapeado (1..n), y dos vértices u y v conectados por una arista
+ cree la función:func esAristaPuente(Grafo<int>: g, int: u, int: v): bool 
+Que determine si al ignorar la arista (u,v) el grafo deja de ser conexo (sin modificar el grafo). 
+NO DEBE USAR APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+func esAristaPuente(Grafo<int>: g,int:a,b): bool 
+var 
+    Array[1..n] of bool: visitados 
+    Lista<int>: vecinos 
+    Cola<int:>: vecinos 
+    int: v,w,i,nroComp
+begin 
+    for i <- 1 to g.getNvertices() do 
+        visitados[i] <- false 
+    endfor 
+    nroComp <- 0 
+    for i <- 1 to g.getNvertices() do 
+        if(!visitados[i])then 
+            visitados[i] <- true 
+            cola.encolar(i)
+            while(!cola.esVacia())do 
+                v <- cola.getHead()
+                vecinos <- g.getVecinos(v)
+                while(!vecinos.esVacia())do 
+                    w <- vecinos.consultar(1)
+                    if(v = a AND w = b)then
+                        // no hace nada 
+                    else 
+                        if(!visitadps[w])then
+                            visitados[w] <- true 
+                            cola.encolar(w)
+                        endif 
+                    endif 
+                    vecinos.eliminar(1)
+                endwhile 
+                cola.desencolar()
+            endwhile
+            nroComp <- nroComp + 1 
+        endif 
+    endfor 
+    if(nroComp > 1)then
+        return true 
+    endif 
+    return false 
+endfunc
