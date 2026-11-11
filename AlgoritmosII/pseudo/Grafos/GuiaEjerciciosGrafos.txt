@@ -1129,3 +1129,69 @@ endfunc
 // olvide avanzar el vertice
 // no se debe descartar el arreglo de posiciones porque sirve para hacer el desmapeo
 // nvertices y narcos falto asignarlos
+
+
+proc Grafo<int>::eliminarVertice(Element: v)
+var 
+    PointerToNodoVertice<Element>: ptrV,antV 
+    PointerToNodoArco<Element>: arcoAct 
+begin
+    antV <- NULL 
+    ptrV <- instance.primero
+    while(ptrV AND ptrV^.getInfo() != v)do
+        antV <- ptrV 
+        ptrV <- ptrV^.getSiguiente()
+    endwhile
+    if(!ptrV)then
+        return 
+    endif 
+    arcoAct <- ptrV^.getListaAdy()
+    while(arcoAct)do
+        eliminarArco(arcoAct^.getDestino(),ptrV)
+        arcoAct <-arcoAct^.getSiguiente()
+    endwhile
+    arcoAct <- ptrV^.getListaAdy()
+    while(arcoAct)do
+        arcoSig <- arcoAct^.getSiguiente()
+        arcoAct^.setSiguiente(NULL)
+        delete arcoAct
+        nArcos <- nArcos - 1
+        arcoAct <- arcoSig
+    endwhile
+    if(antV)then
+        antV^.setSiguiente(ptrV^.getSiguiente())
+    else
+        instance.primero <- ptrV^.getSiguiente()
+    endwhile
+    ptrV^.setSiguiente(NULL)
+    delete ptrV 
+    nVertices <- nVertices - 1
+endproc
+
+proc Grafo<int>::eliminarArco(PointerToNodoVertice<Element>: v,w)
+var
+    PointerToNodoArco<Element>: arcoAct,arcoSig,arcoAnt
+    bool: borrado
+begin
+    borrado <- false 
+    arcoAnt <- NULL
+    arcoAct <- v^.getListaAdy()
+    while(arcoAct AND !borrado)do 
+        arcoSig <- arcoAct^.getSiguiente()
+        if(arcoAct^.getDestino() = w)then
+            if(arcoAnt)then
+                arcoAnt^.setSiguiente(arcoSig)
+            else
+                v^.setListaAdy(arcoSig)
+            endif
+            arcoAct^.setSiguiente(NULL)
+            nArcos <- nArcos - 1
+            delete arcoAct
+            arcoAct <- arcoSig
+        else
+            arcoAnt <- arcoAct
+            arcoAct <- arcoSig
+        endif
+    endwhile
+endproc
+    

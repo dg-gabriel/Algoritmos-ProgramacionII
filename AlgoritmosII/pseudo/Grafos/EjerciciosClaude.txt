@@ -509,7 +509,7 @@ begin
     while(!vecinos.esVacia())do
         w <- vecinos.consultar(1)
         if(!visitados[w])then
-            DFS(g,v,w,visitados,tieneCiclo)
+            DFS(g,w,v,visitados,tieneCiclo)
         else
             if(w != padre)then
                 tieneCiclo <- true
@@ -1136,3 +1136,96 @@ begin
     endif 
     return false 
 endfunc
+
+
+
+
+1. (10 pts) Desarrolle el método de la clase GrafoDirigido:func GrafoDirigido<Element>::filtrarArcosPesados(float: maxPeso): int 
+Que modifique el grafo instancia eliminando todos aquellos arcos cuyo peso sea estrictamente mayor que maxPeso, y retorne la cantidad total de arcos eliminados. 
+USE SOLO APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+func Grafo<int>::filtrarArcosPesados(float: maxPeso): int 
+var 
+    int: nroElim
+    PointerToNodoArco<Element>: arcoAnt,arcoAct,arcoSig 
+    PointerToNodoVertice<Element>: act 
+begin 
+    nroElim <- 0 
+    act <- instance.primero 
+    while(act)do 
+        arcoAct <- act^.getListaAdy()
+        arcoAnt <- NULL 
+        while(arcoAct)do
+            arcoSig <- arcoAct^.getListaAdy()
+            if(arcoAct^.getPeso() > maxPeso)then 
+                if(arcoAnt)then
+                    arcoAnt^.setSiguiente(arcoSig)
+                else
+                    act^.setListaAdy(arcoSig)
+                endif
+                nArcos <- nArcos - 1 
+                nroElim <- nroElim + 1
+                arcoAct^.setSiguiente(NULL)
+                delete arcoAct
+                arcoAct <- arcoSig 
+            else 
+                arcoAnt <- arcoAct
+                arcoAct <- arcoSig
+            endif
+        endwhile
+        act <- act^.getSiguiente()
+    endwhile
+    return nroElim
+endfunc
+
+
+2. (10 pts) Dado un grafo G no dirigido y mapeado (1..n), 
+cree la función:func esArbol(Grafo<int>: g): bool Que determine si el grafo G es un árbol libre (conexo y acíclico). 
+NO DEBE USAR APUNTADORES EN SU SOLUCIÓN. Su solución debe ser a lo sumo O(n+m).
+
+func esArbol(Grafo<int>: g): bool
+Determina si G es un árbol (conexo y sin ciclos). Debe ser a lo sumo O(n+m)
+
+func esArbol(Grafo<int>: g): bool
+var
+    Array[1..N] of bool: visitados
+    bool: tieneCiclo,esConexo
+    int: nroComp
+begin
+    for i <- 1 to g.getNvertices() do
+        visitados[i] <- false
+    endfor
+    tieneCiclo <- false
+    esConexo <- false
+    nroComp <- 0
+    for i <- 1 to g.getNVertices() do 
+        if(!visitados[i])then
+            DFS(g,i,0,visitados,tieneCiclo)
+            nroComp <- nroComp + 1
+        endif
+    endfor
+    if(nroComp = 1)then
+        esConexo <- true
+    endif
+    return esConexo && !tieneCiclo
+endfunc
+
+proc DFS(Grafo<int>: g,int: v,padre,ref: Array[1..N] of bool: visitados,ref: bool: tieneCiclo)
+var
+    Lista<int>: vecinos
+    int: w
+begin
+    visitados[v] <- true
+    vecinos <- g.getVecinos(v)
+    while(!vecinos.esVacia())do
+        w <- vecinos.consultar(1)
+        if(!visitados[w])then
+            DFS(g,w,v,visitados,tieneCiclo)
+        else
+            if(w != padre)then
+                tieneCiclo <- true
+            endif
+        endif
+        vecinos.eliminar(1)
+    endwhile
+endproc
