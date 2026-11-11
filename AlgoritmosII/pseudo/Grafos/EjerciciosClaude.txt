@@ -1229,3 +1229,48 @@ begin
         vecinos.eliminar(1)
     endwhile
 endproc
+
+
+
+// grafo no dirigido y mapeado (1..n)
+// getVecinos O(k) asumido
+// complejidad: exponencial en el peor caso (hay que generar todos los caminos)
+func todosLosCaminos(Grafo<int>: g,int: origen,destino): Lista<Lista<int>>
+var
+    Lista<Lista<int>>: result
+    Lista<int>: camino
+    Array[1..n] of bool: visitados
+    int: i
+begin
+    for i <- 1 to g.getNvertices() do
+        visitados[i] <- false
+    endfor
+    result.construir()
+    camino.construir()
+    caminosDFS(g,origen,destino,visitados,camino,result)
+    return result
+endfunc
+
+proc caminosDFS(Grafo<int>: g,int: v,destino,ref: Array[1..n] of bool: visitados,ref: Lista<int>: camino,ref: Lista<Lista<int>>: result)
+var
+    Lista<int>: vecinos,copia
+    int: w
+begin
+    visitados[v] <- true
+    camino.insertar(v,camino.getLength()+1)
+    if(v = destino)then
+        copia <- camino.copiar()
+        result.insertar(copia,result.getLength()+1)
+    else
+        vecinos <- g.getVecinos(v)
+        while(!vecinos.esVacia())do
+            w <- vecinos.consultar(1)
+            if(!visitados[w])then
+                caminosDFS(g,w,destino,visitados,camino,result)
+            endif
+            vecinos.eliminar(1)
+        endwhile
+    endif
+    camino.eliminar(camino.getLength())
+    visitados[v] <- false
+endproc
