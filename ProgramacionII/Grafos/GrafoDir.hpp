@@ -30,20 +30,20 @@ class GrafoDir{
         GrafoDir(const GrafoDir<Element>& target);                              // O(n+m), constructor copia
         ~GrafoDir();                                                            // O(n+m), destructor
         GrafoDir<Element>& operator=(const GrafoDir<Element>& target);          // O(n+m), sobrecarga del op. de asignacion
-        void insertarVertice(Element v);                                        // O(1), inserta nuevo vertice al principio
-        void insertarArco(Element v,Element w,float p);                         // O(n), inserta nuevo arco al inicio de la lista de ady
-        list<Element> getSucesores(Element v);                                  // O(n+k) k <= m, retorna una lista de quienes van despues de v (Grafo Dirigido)
-        list<Element> getPredecesores(Element v);                               // O(n+k) k <= m, retorna una lista de quienes van antes de v (Grafo Dirigido)
-        list<Element> getVecinos(Element v);                                    // O(n+m), retorna una lista de todos quienes inciden en v
-        bool existeVertice(Element v);                                          // O(n), true si v esta en el grafo, false si no
-        bool existeArco(Element v,Element w);                                   // O(n+k), true si hay un arco de v a w, false si no
-        float getCostoArco(Element v,Element w);                                // O(n+k), retorna el costo del arco
+        void insertarVertice(const Element& v);                                 // O(1), inserta nuevo vertice al principio
+        void insertarArco(const Element& v,const Element& w,float p);           // O(n), inserta nuevo arco al inicio de la lista de ady
+        list<Element> getSucesores(const Element& v);                           // O(n+k) k <= m, retorna una lista de quienes van despues de v (Grafo Dirigido)
+        list<Element> getPredecesores(const Element& v);                        // O(n+k) k <= m, retorna una lista de quienes van antes de v (Grafo Dirigido)
+        list<Element> getVecinos(const Element& v);                             // O(n+m), retorna una lista de todos quienes inciden en v
+        bool existeVertice(const Element& v);                                   // O(n), true si v esta en el grafo, false si no
+        bool existeArco(const Element& v,const Element& w);                     // O(n+k), true si hay un arco de v a w, false si no
+        float getCostoArco(const Element& v,const Element& w);                  // O(n+k), retorna el costo del arco
         list<list<Element> > getArcos();                                        // O(n+m), retorna una lista de todas las adyacencias [[v1,v2],[v2,v3]]
         list<Element> getVertices();                                            // O(n), retorna la lista de todos los vertices
         bool esVacio();                                                         // O(1), ya sabes que hace esto
-        void eliminarArco(Element v,Element w);                                 // O(n+k), elimina el arco entre v y w
-        void eliminarVertice(Element v);                                        // O(n+m), elimina el vertice v y toda incidencia que haya en el
-        void modificarPesoArco(Element v,Element w,float p);                    // O(n+k)
+        void eliminarArco(const Element& v,const Element& w);                   // O(n+k), elimina el arco entre v y w
+        void eliminarVertice(const Element& v);                                 // O(n+m), elimina el vertice v y toda incidencia que haya en el
+        void modificarPesoArco(const Element& v,const Element& w,float p);      // O(n+k)
         int getNVertices();                                                     // O(1)
         int getNArcos();                                                        // O(1)
         void vaciar();                                                          // O(n+m)
@@ -194,14 +194,14 @@ GrafoDir<Element>& GrafoDir<Element>::operator=(const GrafoDir<Element>& target)
 }
 
 template <class Element>
-void GrafoDir<Element>::insertarVertice(Element v){
+void GrafoDir<Element>::insertarVertice(const Element& v){
     NodoVertice<Element> *nuevo = new NodoVertice<Element>(v,primero,NULL);
     primero = nuevo;
     nVertices++;
 }
 
 template <class Element>
-void GrafoDir<Element>::insertarArco(Element v,Element w,float p){
+void GrafoDir<Element>::insertarArco(const Element& v,const Element& w,float p){
     NodoVertice<Element> *ptrV,*ptrW;
     ptrV = buscarVertice(v);
     ptrW = buscarVertice(w);
@@ -213,7 +213,7 @@ void GrafoDir<Element>::insertarArco(Element v,Element w,float p){
 }
 
 template <class Element>
-list<Element> GrafoDir<Element>::getSucesores(Element v){
+list<Element> GrafoDir<Element>::getSucesores(const Element& v){
     list<Element> res;
     NodoVertice<Element> *ptrV = buscarVertice(v);
     NodoArco<Element> *arcoV;
@@ -227,15 +227,27 @@ list<Element> GrafoDir<Element>::getSucesores(Element v){
     return res;
 }
 
+template <class Element>
+list<Element> GrafoDir<Element>::getSucesores(const Element &v){
+    list<Element>: res; 
+    NodoVertice<Element> *ptrV = buscarVertice(v);
+    while(ptrV){
+        NodoArco<Element> *arcoAct = ptrV->getListaAdy();
+        while(arcoAct){
+            
+        }
+    }
+}
+
 // sucesores y vecinos
 
 template <class Element>
-bool GrafoDir<Element>::existeVertice(Element v){
+bool GrafoDir<Element>::existeVertice(const Element& v){
     return buscarVertice(v) != NULL;
 }
 
 template <class Element>
-bool GrafoDir<Element>::existeArco(Element v,Element w){
+bool GrafoDir<Element>::existeArco(const Element& v,const Element& w){
     NodoVertice<Element> *ptrV = buscarVertice(v);
     NodoVertice<Element> *ptrW = buscarVertice(w);
     if(ptrV && ptrW){
@@ -245,7 +257,7 @@ bool GrafoDir<Element>::existeArco(Element v,Element w){
 }
 
 template <class Element>
-float GrafoDir<Element>::getCostoArco(Element v,Element w){
+float GrafoDir<Element>::getCostoArco(const Element& v,const Element& w){
     NodoVertice<Element> *ptrV = buscarVertice(v);
     NodoVertice<Element> *ptrW = buscarVertice(w);
     if(ptrV && ptrW){
@@ -255,6 +267,125 @@ float GrafoDir<Element>::getCostoArco(Element v,Element w){
         }
     }
     return -1;
+}
+
+template <class Element>
+list<list<Element> > GrafoDir<Element>::getArcos(){
+    list<list<Element> > res;
+    NodoVertice<Element>* act = primero;
+    while(act){
+        NodoArco<Element> *arcoAct = act->getListaAdy();
+        while(arcoAct){
+            list<Element> arco;
+            arco.push_back(act->getInfo());
+            arco.push_back(arcoAct->getDestino()->getInfo());
+            res.push_back(arco);
+            arcoAct = arcoAct->getSiguiente();
+        }
+        act = act->getSiguiente();
+    }
+    return res;
+}
+
+template <class Element>
+list<Element> GrafoDir<Element>::getVertices(){
+    list<Element> res;
+    NodoVertice<Element> *act = primero;
+    while(act){
+        res.push_back(act->getInfo());
+        act = act->getSiguiente();
+    }
+    return res;
+}
+
+template <class Element>
+bool GrafoDir<Element>::esVacio(){
+    return primero == NULL;
+}
+
+template <class Element>
+void GrafoDir<Element>::eliminarArco(const Element& v,const Element& w){
+    NodoVertice<Element> *ptrV = buscarVertice(v), *ptrW = buscarVertice(w);
+    if(!ptrV || !ptrW){
+        return;
+    }
+    if(eliminarArcoAux(ptrV, ptrW)){      
+        nArcos--;                     
+    }
+}
+
+template <class Element>
+void GrafoDir<Element>::eliminarVertice(const Element& v){
+    NodoVertice<Element>* ptrV = buscarVertice(v);
+    if(!ptrV){
+        return;
+    }
+    NodoVertice<Element>* act = primero;
+    NodoVertice<Element>* ant = NULL;
+
+    while(act){
+        if(act != ptrV){
+            if(eliminarArcoAux(act, ptrV)){
+                nArcos--;
+            }
+        }
+        if(act->getSiguiente() == ptrV){
+            ant = act;
+        }
+        act = act->getSiguiente();
+    }
+
+    nArcos -= vaciarListaArcos(ptrV->getListaAdy());
+
+    if(ptrV == primero){
+        primero = ptrV->getSiguiente(); 
+    }
+    else if(ant){
+        ant->setSiguiente(ptrV->getSiguiente()); 
+    }
+
+    delete ptrV;
+    nVertices--;
+}
+
+template <class Element>
+void GrafoDir<Element>::modificarPesoArco(const Element& v,const Element& w,float p){
+    NodoVertice<Element> *ptrV = buscarVertice(v), *ptrW = buscarVertice(w);
+    if(!ptrV || !ptrW || p < 0){
+        return;
+    }
+    NodoArco<Element> *arcoAct = buscarArco(ptrV,ptrW);
+    if(arcoAct){
+        arcoAct->setPeso(p);
+        if(ptrV != ptrW){
+            buscarArco(ptrW,ptrV)->setPeso(p);
+        }
+    }
+}
+
+template <class Element>
+int GrafoDir<Element>::getNVertices(){
+    return nVertices;
+}
+
+template <class Element>
+int GrafoDir<Element>::getNArcos(){
+    return nArcos;
+}
+
+template <class Element>
+void GrafoDir<Element>::vaciar(){
+    NodoVertice<Element>* act = primero;
+    NodoVertice<Element>* sig;
+    while(act){
+        sig = act->getSiguiente();              
+        vaciarListaArcos(act->getListaAdy());   
+        delete act;                             
+        act = sig;                              
+    }
+    primero = NULL;
+    nVertices = 0;
+    nArcos = 0;
 }
 
 #endif
