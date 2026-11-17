@@ -51,7 +51,8 @@ class GrafoNoDir{
         int getNArcos();                                                        // O(1)
         list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura
         list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad
-        int getNComponentesConexas();                                           // O(n+m), recorre el grafo y encuentra la cantidad de CCs
+        int getNComponentesConexas();                                           // O(n+m), explora el grafo y retorna la cantidad de CCS
+        void imprimirGrafo() const;                                             // O(n+m), imprime el grafo para depurar
         void vaciar();                                                          // O(n+m)
         // dijkstra
         // tarjan para aristas puente
@@ -265,6 +266,9 @@ void GrafoNoDir<Element>::insertarArco(const Element& v,const Element& w,float p
     if(!ptrV || !ptrW){
         return;
     }
+    if(existeArco(v,w)){
+        return;
+    }
     if(ptrV == ptrW){
         insertarArcoAux(ptrV,ptrW,p);
     }
@@ -449,17 +453,42 @@ template <class Element>
 int GrafoNoDir<Element>::getNComponentesConexas(){
     int cont = 0;
     map<NodoVertice<Element>*,bool> visitados;
-    list<Element> descartada;                       
+    list<Element> descartada;                 
 
     NodoVertice<Element>* act = primero;
     while(act){
-        if(!visitados[act]){                        
+        if(!visitados[act]){                       
             cont++;
-            bfsAux(act,visitados,descartada);
+            bfsAux(act,visitados,descartada);       
         }
         act = act->getSiguiente();
     }
     return cont;
+}
+
+template <class Element>
+void GrafoNoDir<Element>::imprimirGrafo() const {
+    NodoVertice<Element>* act = primero;
+    cout << "Total Vertices: " << nVertices << " | Total Arcos: " << nArcos << endl;
+    
+    while (act) {
+        cout << "Vertice [" << act->getInfo() << "] -> ";
+        NodoArco<Element>* arco = act->getListaAdy();
+        
+        if (!arco) {
+            cout << "(Sin adyacencias)";
+        }
+        
+        while (arco) {
+            Element destino = arco->getDestino()->getInfo();
+            float peso = arco->getPeso();
+            cout << "[Destino: " << destino << ", Peso: " << peso << "] ";
+            arco = arco->getSiguiente();
+        }
+        cout << endl;
+        act = act->getSiguiente();
+    }
+    cout << "====================================" << endl;
 }
 
 template <class Element>
