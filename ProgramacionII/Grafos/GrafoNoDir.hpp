@@ -51,12 +51,11 @@ class GrafoNoDir{
         int getNArcos();                                                        // O(1)
         list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura
         list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad
+        int getNComponentesConexas();                                           // O(n+m), recorre el grafo y encuentra la cantidad de CCs
         void vaciar();                                                          // O(n+m)
         // dijkstra
-        // prim/kruskal
         // tarjan para aristas puente
         // tarjan para puntos de articulacion
-        // get nro componentes conexas
         // tiene ciclo
         // mapear grafo
 };
@@ -444,6 +443,23 @@ list<Element> GrafoNoDir<Element>::dfs(const Element& v){
         dfsAux(inicio, visitado, recorrido);
     }
     return recorrido;
+}
+
+template <class Element>
+int GrafoNoDir<Element>::getNComponentesConexas(){
+    int cont = 0;
+    map<NodoVertice<Element>*,bool> visitados;
+    list<Element> descartada;                       
+
+    NodoVertice<Element>* act = primero;
+    while(act){
+        if(!visitados[act]){                        
+            cont++;
+            bfsAux(act,visitados,descartada);
+        }
+        act = act->getSiguiente();
+    }
+    return cont;
 }
 
 template <class Element>

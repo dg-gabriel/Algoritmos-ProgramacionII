@@ -24,6 +24,12 @@ class GrafoDir{
         bool eliminarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w);          // O(arcos(o)), retorna true si exisita el arco      
         int vaciarListaArcos(NodoArco<Element>* lista);                                 // vacia la lista de ady y retorna cuantos borro
         void copiarGrafo(const GrafoDir<Element>& target);                              // auxiliar para copiar un grafo                      
+        void bfsAux(NodoVertice<Element>* inicio,
+                    map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido por niveles
+                    list<Element>& recorrido);                                          
+        void dfsAux(NodoVertice<Element>* inicio,
+                    map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido en profundidad (pila)
+                    list<Element>& recorrido); 
         
     public:
         GrafoDir();                                                             // O(1), constructor
@@ -46,6 +52,9 @@ class GrafoDir{
         void modificarPesoArco(const Element& v,const Element& w,float p);      // O(n+k)
         int getNVertices();                                                     // O(1)
         int getNArcos();                                                        // O(1)
+        list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura desde v
+        list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad desde v
+        int getNComponentesConexas();                                           // O(n(n+m)), recorre el grafo y encuentra la cantidad de CCs
         void vaciar();                                                          // O(n+m)
         // tarjan para componentes fuertemente conexas
         // ordenamiento topologico (funciona solo en DAG)
@@ -164,6 +173,59 @@ void GrafoDir<Element>::copiarGrafo(const GrafoDir<Element>& target){
     nArcos = target.nArcos;
 }
 
+template <class Element>
+void GrafoDir<Element>::bfsAux(NodoVertice<Element>* inicio,map<NodoVertice<Element>*,bool>& visitado,list<Element>& recorrido){
+    queue<NodoVertice<Element>*> cola;
+    cola.push(inicio);
+    visitado[inicio] = true;                
+
+    while(!cola.empty()){
+        NodoVertice<Element>* act = cola.front();
+        cola.pop();
+        recorrido.push_back(act->getInfo());
+
+        NodoArco<Element>* arco = act->getListaAdy();
+        while(arco){
+            NodoVertice<Element>* destino = arco->getDestino();
+            if(!visitado[destino]){
+                visitado[destino] = true;
+                cola.push(destino);
+            }
+            arco = arco->getSiguiente();
+        }
+    }
+}
+
+template <class Element>
+void GrafoDir<Element>::dfsAux(NodoVertice<Element>* inicio,map<NodoVertice<Element>*,bool>& visitado,list<Element>& recorrido){
+    stack<NodoVertice<Element>*> pila;
+    pila.push(inicio);
+
+    while(!pila.empty()){
+        NodoVertice<Element>* act = pila.top();
+        pila.pop();
+
+        if(!visitado[act]){                        // se marca al sacar, no al apilar
+            visitado[act] = true;
+            recorrido.push_back(act->getInfo());
+
+            // vecinos no visitados en orden inverso, para que el primero quede arriba de la pila
+            list<NodoVertice<Element>*> destinos;
+            NodoArco<Element>* arco = act->getListaAdy();
+            while(arco){
+                if(!visitado[arco->getDestino()]){
+                    destinos.push_front(arco->getDestino());
+                }
+                arco = arco->getSiguiente();
+            }
+            typename list<NodoVertice<Element>*>::iterator it;
+            for(it = destinos.begin(); it != destinos.end(); ++it){
+                pila.push(*it);
+            }
+        }
+    }
+}
+
 /////////// Publicos ///////////
 
 template <class Element>
@@ -213,7 +275,7 @@ void GrafoDir<Element>::insertarArco(const Element& v,const Element& w,float p){
 }
 
 template <class Element>
-list<Element> GrafoDir<Element>::getSucesores(const Element& v){
+list<Element> GrafoDir<Element>::getSucesores(const Element &v){
     list<Element> res;
     NodoVertice<Element> *ptrV = buscarVertice(v);
     NodoArco<Element> *arcoV;
@@ -228,18 +290,54 @@ list<Element> GrafoDir<Element>::getSucesores(const Element& v){
 }
 
 template <class Element>
-list<Element> GrafoDir<Element>::getSucesores(const Element &v){
-    list<Element>: res; 
-    NodoVertice<Element> *ptrV = buscarVertice(v);
-    while(ptrV){
-        NodoArco<Element> *arcoAct = ptrV->getListaAdy();
-        while(arcoAct){
-            
-        }
+list<Element> GrafoDir<Element>::getPredecesores(const Element &v){
+    list<Element> res;
+    NodoVertice<Element> *ptrV = buscarVertice(v),*act = primero;
+    if(!ptrV){
+        return res;
     }
+    while(act){
+        NodoArco<Element> *arcoAct = act->getListaAdy();
+        while(arcoAct){
+            if(arcoAct->getDestino() == ptrV){
+                res.push_back(act->getInfo());
+            }
+            arcoAct = arcoAct->getSiguiente();
+        }
+        act = act->getSiguiente();
+    }
+    return res;
 }
 
-// sucesores y vecinos
+template <class Element>
+list<Element> GrafoDir<Element>::getVecinos(const Element& v){
+    list<Element> res;
+    NodoVertice<Element>* ptrV = buscarVertice(v);
+    if(!ptrV){
+        return res;
+    }
+    map<NodoVertice<Element>*,bool> agregado;
+
+    NodoArco<Element>* arco = ptrV->getListaAdy();
+    while(arco){
+        NodoVertice<Element>* w = arco->getDestino();
+        if(!agregado[w]){
+            agregado[w] = true;
+            res.push_back(w->getInfo());
+        }
+        arco = arco->getSiguiente();
+    }
+
+    NodoVertice<Element>* u = primero;
+    while(u){
+        if(!agregado[u] && buscarArco(u,ptrV)){
+            agregado[u] = true;
+            res.push_back(u->getInfo());
+        }
+        u = u->getSiguiente();
+    }
+    return res;
+}
 
 template <class Element>
 bool GrafoDir<Element>::existeVertice(const Element& v){
@@ -371,6 +469,33 @@ int GrafoDir<Element>::getNVertices(){
 template <class Element>
 int GrafoDir<Element>::getNArcos(){
     return nArcos;
+}
+
+template <class Element>
+list<Element> GrafoDir<Element>::bfs(const Element& v){
+    list<Element> recorrido;
+    NodoVertice<Element>* inicio = buscarVertice(v);
+    if(inicio){
+        map<NodoVertice<Element>*,bool> visitado;
+        bfsAux(inicio,visitado,recorrido);
+    }
+    return recorrido;
+}
+
+template <class Element>
+list<Element> GrafoDir<Element>::dfs(const Element& v){
+    list<Element> recorrido;
+    NodoVertice<Element>* inicio = buscarVertice(v);
+    if(inicio){
+        map<NodoVertice<Element>*,bool> visitado;
+        dfsAux(inicio,visitado,recorrido);
+    }
+    return recorrido;
+}
+
+template <class Element>
+int GrafoDir<Element>::getNComponentesConexas(){
+    
 }
 
 template <class Element>
