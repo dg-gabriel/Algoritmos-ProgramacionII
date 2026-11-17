@@ -30,6 +30,8 @@ class GrafoNoDir{
         void dfsAux(NodoVertice<Element>* act, 
                     map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido recursivo
                     list<Element>& recorrido);
+        bool tieneCicloAux(NodoVertice<Element>* act,NodoVertice<Element>* padre
+                            ,map<NodoVertice<Element>*,bool>& visitados);               // O(n+m), DFS con padre
     public:
         GrafoNoDir();                                                           // O(1), constructor
         GrafoNoDir(const GrafoNoDir<Element>& target);                          // O(n+m), constructor copia
@@ -52,13 +54,12 @@ class GrafoNoDir{
         list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura
         list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad
         int getNComponentesConexas();                                           // O(n+m), explora el grafo y retorna la cantidad de CCS
+        bool tieneCiclo();                                                      // O(n+m), true si el grafo tiene al menos un ciclo
         void imprimirGrafo() const;                                             // O(n+m), imprime el grafo para depurar
         void vaciar();                                                          // O(n+m)
         // dijkstra
         // tarjan para aristas puente
         // tarjan para puntos de articulacion
-        // tiene ciclo
-        // mapear grafo
 };
 
 /////////// Privados ///////////
@@ -174,7 +175,7 @@ template <class Element>
 void GrafoNoDir<Element>::bfsAux(NodoVertice<Element>* inicio, map<NodoVertice<Element>*, bool>& visitado, list<Element>& recorrido){
     queue<NodoVertice<Element>*> cola;
     cola.push(inicio);
-    visitado[inicio] = true;                       // se marca al encolar
+    visitado[inicio] = true;                       
 
     while(!cola.empty()){
         NodoVertice<Element>* act = cola.front();
@@ -220,6 +221,27 @@ void GrafoNoDir<Element>::dfsAux(NodoVertice<Element>* inicio, map<NodoVertice<E
             }
         }
     }
+}
+
+template <class Element>
+bool GrafoNoDir<Element>::tieneCicloAux(NodoVertice<Element>* act,NodoVertice<Element>* padre,map<NodoVertice<Element>*,bool>& visitados){
+    visitados[act] = true;
+    bool padreSaltado = false;
+    NodoArco<Element>* arco = act->getListaAdy();
+    while(arco){
+        NodoVertice<Element>* w = arco->getDestino();
+        if(w == padre && !padreSaltado){
+            padreSaltado = true;                    // el arco por el que llegamos se ignora una sola vez
+        }
+        else if(visitados[w]){
+            return true;                            // arista hacia un vertice ya visitado (o arista repetida): ciclo
+        }
+        else if(tieneCicloAux(w,act,visitados)){
+            return true;
+        }
+        arco = arco->getSiguiente();
+    }
+    return false;
 }
 
 /////////// Publicos ///////////
@@ -447,6 +469,19 @@ list<Element> GrafoNoDir<Element>::dfs(const Element& v){
         dfsAux(inicio, visitado, recorrido);
     }
     return recorrido;
+}
+
+template <class Element>
+bool GrafoNoDir<Element>::tieneCiclo(){
+    map<NodoVertice<Element>*,bool> visitados;
+    NodoVertice<Element>* act = primero;
+    while(act){
+        if(!visitados[act] && tieneCicloAux(act,NULL,visitados)){
+            return true;
+        }
+        act = act->getSiguiente();
+    }
+    return false;
 }
 
 template <class Element>

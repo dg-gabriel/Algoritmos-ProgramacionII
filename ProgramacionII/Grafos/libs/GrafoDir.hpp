@@ -23,7 +23,15 @@ class GrafoDir{
         void insertarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w,float p);  // O(1), auxiliar de insercion
         bool eliminarArcoAux(NodoVertice<Element>* v,NodoVertice<Element>* w);          // O(arcos(o)), retorna true si exisita el arco      
         int vaciarListaArcos(NodoArco<Element>* lista);                                 // vacia la lista de ady y retorna cuantos borro
-        void copiarGrafo(const GrafoDir<Element>& target);                              // auxiliar para copiar un grafo                      
+        void copiarGrafo(const GrafoDir<Element>& target);                              // auxiliar para copiar un grafo 
+        void bfsAux(NodoVertice<Element>* inicio,
+                    map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido por niveles
+                    list<Element>& recorrido); 
+        void dfsAux(NodoVertice<Element>* inicio,
+                    map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido en profundidad (pila)
+                    list<Element>& recorrido);                      
+        bool tieneCicloAux(NodoVertice<Element>* act,
+                            map<NodoVertice<Element>*,int>& estado);                    // O(n+m), DFS con estados
         
     public:
         GrafoDir();                                                             // O(1), constructor
@@ -46,13 +54,14 @@ class GrafoDir{
         void modificarPesoArco(const Element& v,const Element& w,float p);      // O(n+k)
         int getNVertices();                                                     // O(1)
         int getNArcos();                                                        // O(1)
+        list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura desde v (solo alcanzables por arcos salientes)
+        list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad desde v (solo alcanzables por arcos salientes)
+        int getNComponentesConexas();                                           // O(n(n+m)), recorre y retorna el numero de CCs, ignora el sentido de los arcos
+        bool tieneCiclo();                                                      // O(n+m), true si el grafo tiene al menos un ciclo
+        void imprimirGrafo() const;                                             // O(n+m), imprime el grafo para depurar
         void vaciar();                                                          // O(n+m)
         // tarjan para componentes fuertemente conexas
         // ordenamiento topologico (funciona solo en DAG)
-        // get nro componentes conexas
-        // tiene ciclo
-        // mapear grafo
-
 };
 
 //////////// Privados //////////
@@ -162,6 +171,77 @@ void GrafoDir<Element>::copiarGrafo(const GrafoDir<Element>& target){
     }
     nVertices = target.nVertices;
     nArcos = target.nArcos;
+}
+
+template <class Element>
+void GrafoDir<Element>::bfsAux(NodoVertice<Element>* inicio,map<NodoVertice<Element>*,bool>& visitado,list<Element>& recorrido){
+    queue<NodoVertice<Element>*> cola;
+    cola.push(inicio);
+    visitado[inicio] = true;                       // se marca al encolar
+
+    while(!cola.empty()){
+        NodoVertice<Element>* act = cola.front();
+        cola.pop();
+        recorrido.push_back(act->getInfo());
+
+        NodoArco<Element>* arco = act->getListaAdy();
+        while(arco){
+            NodoVertice<Element>* destino = arco->getDestino();
+            if(!visitado[destino]){
+                visitado[destino] = true;
+                cola.push(destino);
+            }
+            arco = arco->getSiguiente();
+        }
+    }
+}
+
+template <class Element>
+void GrafoDir<Element>::dfsAux(NodoVertice<Element>* inicio,map<NodoVertice<Element>*,bool>& visitado,list<Element>& recorrido){
+    stack<NodoVertice<Element>*> pila;
+    pila.push(inicio);
+
+    while(!pila.empty()){
+        NodoVertice<Element>* act = pila.top();
+        pila.pop();
+
+        if(!visitado[act]){                        // se marca al sacar, no al apilar
+            visitado[act] = true;
+            recorrido.push_back(act->getInfo());
+
+            // vecinos no visitados en orden inverso, para que el primero quede arriba de la pila
+            list<NodoVertice<Element>*> destinos;
+            NodoArco<Element>* arco = act->getListaAdy();
+            while(arco){
+                if(!visitado[arco->getDestino()]){
+                    destinos.push_front(arco->getDestino());
+                }
+                arco = arco->getSiguiente();
+            }
+            typename list<NodoVertice<Element>*>::iterator it;
+            for(it = destinos.begin(); it != destinos.end(); ++it){
+                pila.push(*it);
+            }
+        }
+    }
+}
+
+template <class Element>
+bool GrafoDir<Element>::tieneCicloAux(NodoVertice<Element>* act,map<NodoVertice<Element>*,int>& estado){
+    estado[act] = 1;                                
+    NodoArco<Element>* arco = act->getListaAdy();
+    while(arco){
+        NodoVertice<Element>* w = arco->getDestino();
+        if(estado[w] == 1){
+            return true;                            
+        }
+        if(estado[w] == 0 && tieneCicloAux(w,estado)){
+            return true;
+        }
+        arco = arco->getSiguiente();
+    }
+    estado[act] = 2;                                
+    return false;
 }
 
 /////////// Publicos ///////////
@@ -374,6 +454,97 @@ int GrafoDir<Element>::getNVertices(){
 template <class Element>
 int GrafoDir<Element>::getNArcos(){
     return nArcos;
+}
+
+template <class Element>
+list<Element> GrafoDir<Element>::bfs(const Element& v){
+    list<Element> recorrido;
+    NodoVertice<Element>* inicio = buscarVertice(v);
+    if(inicio){
+        map<NodoVertice<Element>*,bool> visitado;
+        bfsAux(inicio,visitado,recorrido);
+    }
+    return recorrido;
+}
+
+template <class Element>
+list<Element> GrafoDir<Element>::dfs(const Element& v){
+    list<Element> recorrido;
+    NodoVertice<Element>* inicio = buscarVertice(v);
+    if(inicio){
+        map<NodoVertice<Element>*,bool> visitado;
+        dfsAux(inicio,visitado,recorrido);
+    }
+    return recorrido;
+}
+
+template <class Element>
+int GrafoDir<Element>::getNComponentesConexas(){
+    int cont = 0;
+    map<Element,bool> visitados;
+    list<Element> vertices = getVertices();
+
+    typename list<Element>::iterator it;
+    for(it = vertices.begin(); it != vertices.end(); ++it){
+        if(!visitados[*it]){                            
+            cont++;
+            queue<Element> cola;
+            cola.push(*it);
+            visitados[*it] = true;                      
+
+            while(!cola.empty()){
+                Element act = cola.front();
+                cola.pop();
+                list<Element> vecinos = getVecinos(act);    
+                typename list<Element>::iterator jt;
+                for(jt = vecinos.begin(); jt != vecinos.end(); ++jt){
+                    if(!visitados[*jt]){
+                        visitados[*jt] = true;
+                        cola.push(*jt);
+                    }
+                }
+            }
+        }
+    }
+    return cont;
+}
+
+template <class Element>
+bool GrafoDir<Element>::tieneCiclo(){
+    map<NodoVertice<Element>*,int> estado;          
+    NodoVertice<Element>* act = primero;
+    while(act){
+        if(estado[act] == 0 && tieneCicloAux(act,estado)){
+            return true;
+        }
+        act = act->getSiguiente();
+    }
+    return false;
+}
+
+template <class Element>
+void GrafoDir<Element>::imprimirGrafo() const {
+    NodoVertice<Element>* act = primero;
+    cout << "Total Vertices: " << nVertices << " | Total Arcos: " << nArcos << endl;
+    
+    while (act) {
+        cout << "Vertice [" << act->getInfo() << "] -> ";
+        NodoArco<Element>* arco = act->getListaAdy();
+        
+        if (!arco) {
+            cout << "(Sin adyacencias)";
+        }
+        
+        while (arco) {
+            Element destino = arco->getDestino()->getInfo();
+            float peso = arco->getPeso();
+            cout << "[Destino: " << destino << ", Peso: " << peso << "] ";
+            arco = arco->getSiguiente();
+        }
+        cout << endl;
+        act = act->getSiguiente();
+    }
+    cout << "====================================" << endl;
 }
 
 template <class Element>
