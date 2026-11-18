@@ -182,7 +182,7 @@ template <class Element>
 void GrafoDir<Element>::bfsAux(NodoVertice<Element>* inicio,map<NodoVertice<Element>*,bool>& visitado,list<Element>& recorrido){
     queue<NodoVertice<Element>*> cola;
     cola.push(inicio);
-    visitado[inicio] = true;                       // se marca al encolar
+    visitado[inicio] = true;
 
     while(!cola.empty()){
         NodoVertice<Element>* act = cola.front();
@@ -210,11 +210,10 @@ void GrafoDir<Element>::dfsAux(NodoVertice<Element>* inicio,map<NodoVertice<Elem
         NodoVertice<Element>* act = pila.top();
         pila.pop();
 
-        if(!visitado[act]){                        // se marca al sacar, no al apilar
+        if(!visitado[act]){
             visitado[act] = true;
             recorrido.push_back(act->getInfo());
 
-            // vecinos no visitados en orden inverso, para que el primero quede arriba de la pila
             list<NodoVertice<Element>*> destinos;
             NodoArco<Element>* arco = act->getListaAdy();
             while(arco){
@@ -251,31 +250,35 @@ bool GrafoDir<Element>::tieneCicloAux(NodoVertice<Element>* act,map<NodoVertice<
 
 template <class Element>
 void GrafoDir<Element>::dijkstraAux(NodoVertice<Element>* origen,NodoVertice<Element>* destino,map<NodoVertice<Element>*,float>& dist,map<NodoVertice<Element>*,NodoVertice<Element>*>& padre){
-    priority_queue<pair<float,NodoVertice<Element>*> > cola;   // max-heap: se guarda la distancia NEGADA para sacar la menor
+    map<NodoVertice<Element>*,bool> fijado;
     dist[origen] = 0;
-    cola.push(make_pair(0.0f,origen));
 
-    while(!cola.empty()){
-        float d = -cola.top().first;
-        NodoVertice<Element>* act = cola.top().second;
-        cola.pop();
-
-        if(d > dist[act]){
-            continue;                               // entrada vieja: ya se encontro un camino mejor
-        }
-        if(act == destino){
-            return;                                 // la distancia al destino ya es definitiva
-        }
-        NodoArco<Element>* arco = act->getListaAdy();
-        while(arco){
-            NodoVertice<Element>* w = arco->getDestino();
-            float nueva = d + arco->getPeso();
-            if(dist.count(w) == 0 || nueva < dist[w]){
-                dist[w] = nueva;
-                padre[w] = act;
-                cola.push(make_pair(-nueva,w));
+    bool seguir = true;
+    while(seguir){
+        NodoVertice<Element>* act = NULL;
+        NodoVertice<Element>* cand = primero;
+        while(cand){
+            if(!fijado[cand] && dist.count(cand) == 1 && (act == NULL || dist[cand] < dist[act])){
+                act = cand;
             }
-            arco = arco->getSiguiente();
+            cand = cand->getSiguiente();
+        }
+
+        if(act == NULL || act == destino){
+            seguir = false;
+        }
+        else{
+            fijado[act] = true;
+            NodoArco<Element>* arco = act->getListaAdy();
+            while(arco){
+                NodoVertice<Element>* w = arco->getDestino();
+                float nueva = dist[act] + arco->getPeso();
+                if(!fijado[w] && (dist.count(w) == 0 || nueva < dist[w])){
+                    dist[w] = nueva;
+                    padre[w] = act;
+                }
+                arco = arco->getSiguiente();
+            }
         }
     }
 }
@@ -327,6 +330,9 @@ void GrafoDir<Element>::insertarArco(const Element& v,const Element& w,float p){
     if(!ptrV || !ptrW){
         return;
     }
+    if(existeArco(v,w)){
+        return;
+    }
     insertarArcoAux(ptrV,ptrW,p);
     nArcos++;
 }
@@ -347,18 +353,54 @@ list<Element> GrafoDir<Element>::getSucesores(const Element& v){
 }
 
 template <class Element>
-list<Element> GrafoDir<Element>::getSucesores(const Element &v){
-    list<Element>: res; 
-    NodoVertice<Element> *ptrV = buscarVertice(v);
-    while(ptrV){
-        NodoArco<Element> *arcoAct = ptrV->getListaAdy();
-        while(arcoAct){
-            
-        }
+list<Element> GrafoDir<Element>::getPredecesores(const Element& v){
+    list<Element> res;
+    NodoVertice<Element> *ptrV = buscarVertice(v),*act = primero;
+    if(!ptrV){
+        return res;
     }
+    while(act){
+        NodoArco<Element> *arcoAct = act->getListaAdy();
+        while(arcoAct){
+            if(arcoAct->getDestino() == ptrV){
+                res.push_back(act->getInfo());
+            }
+            arcoAct = arcoAct->getSiguiente();
+        }
+        act = act->getSiguiente();
+    }
+    return res;
 }
 
-// sucesores y vecinos
+template <class Element>
+list<Element> GrafoDir<Element>::getVecinos(const Element& v){
+    list<Element> res;
+    NodoVertice<Element>* ptrV = buscarVertice(v);
+    if(!ptrV){
+        return res;
+    }
+    map<NodoVertice<Element>*,bool> agregado;
+
+    NodoArco<Element>* arco = ptrV->getListaAdy();
+    while(arco){
+        NodoVertice<Element>* w = arco->getDestino();
+        if(!agregado[w]){
+            agregado[w] = true;
+            res.push_back(w->getInfo());
+        }
+        arco = arco->getSiguiente();
+    }
+
+    NodoVertice<Element>* u = primero;
+    while(u){
+        if(!agregado[u] && buscarArco(u,ptrV)){
+            agregado[u] = true;
+            res.push_back(u->getInfo());
+        }
+        u = u->getSiguiente();
+    }
+    return res;
+}
 
 template <class Element>
 bool GrafoDir<Element>::existeVertice(const Element& v){
@@ -476,9 +518,6 @@ void GrafoDir<Element>::modificarPesoArco(const Element& v,const Element& w,floa
     NodoArco<Element> *arcoAct = buscarArco(ptrV,ptrW);
     if(arcoAct){
         arcoAct->setPeso(p);
-        if(ptrV != ptrW){
-            buscarArco(ptrW,ptrV)->setPeso(p);
-        }
     }
 }
 

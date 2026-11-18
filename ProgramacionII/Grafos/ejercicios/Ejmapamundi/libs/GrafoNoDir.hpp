@@ -30,6 +30,16 @@ class GrafoNoDir{
         void dfsAux(NodoVertice<Element>* act, 
                     map<NodoVertice<Element>*,bool>& visitado,                          // O(n+m), recorrido recursivo
                     list<Element>& recorrido);
+        bool tieneCicloAux(NodoVertice<Element>* act,NodoVertice<Element>* padre
+                            ,map<NodoVertice<Element>*,bool>& visitados);               // O(n+m), DFS con padre
+        void dijkstraAux(NodoVertice<Element>* origen,NodoVertice<Element>* destino
+                        ,map<NodoVertice<Element>*,float>& dist
+                        ,map<NodoVertice<Element>*,NodoVertice<Element>*>& padre);      // O((n+m) log n), pesos >= 0
+        void tarjanAux(NodoVertice<Element>* v,NodoVertice<Element>* padre,int& tiempo
+                      ,map<NodoVertice<Element>*,int>& disc
+                      ,map<NodoVertice<Element>*,int>& low
+                      ,list<Element>& puntos,list<list<Element> >& puentes);            // O(n+m), DFS con disc y low
+        void calcularTarjan(list<Element>& puntos,list<list<Element> >& puentes);       // O(n+m), recorre todas las componentes
     public:
         GrafoNoDir();                                                           // O(1), constructor
         GrafoNoDir(const GrafoNoDir<Element>& target);                          // O(n+m), constructor copia
@@ -52,13 +62,13 @@ class GrafoNoDir{
         list<Element> bfs(const Element& v);                                    // O(n+m), busqueda en anchura
         list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad
         int getNComponentesConexas();                                           // O(n+m), explora el grafo y retorna la cantidad de CCS
+        bool tieneCiclo();                                                      // O(n+m), true si el grafo tiene al menos un ciclo
+        list<Element> getCaminoMinimo(const Element& v,const Element& w);       // O((n+m) log n), camino de menor peso de v a w (Dijkstra), vacia si no hay
+        float getCostoCaminoMinimo(const Element& v,const Element& w);          // O((n+m) log n), costo del camino minimo de v a w, -1 si no hay
+        list<Element> getPuntosArticulacion();                                  // O(n+m), vertices cuya eliminacion desconecta el grafo
+        list<list<Element> > getPuentes();                                      // O(n+m), aristas cuya eliminacion desconecta el grafo [[v1,v2],...]
         void imprimirGrafo() const;                                             // O(n+m), imprime el grafo para depurar
-        void vaciar();                                                          // O(n+m)
-        // dijkstra
-        // tarjan para aristas puente
-        // tarjan para puntos de articulacion
-        // tiene ciclo
-        // mapear grafo
+        void vaciar();                                                          // O(n+m), vacia el grafo
 };
 
 /////////// Privados ///////////
@@ -174,7 +184,7 @@ template <class Element>
 void GrafoNoDir<Element>::bfsAux(NodoVertice<Element>* inicio, map<NodoVertice<Element>*, bool>& visitado, list<Element>& recorrido){
     queue<NodoVertice<Element>*> cola;
     cola.push(inicio);
-    visitado[inicio] = true;                       // se marca al encolar
+    visitado[inicio] = true;                       
 
     while(!cola.empty()){
         NodoVertice<Element>* act = cola.front();
@@ -219,6 +229,116 @@ void GrafoNoDir<Element>::dfsAux(NodoVertice<Element>* inicio, map<NodoVertice<E
                 pila.push(*it);
             }
         }
+    }
+}
+
+template <class Element>
+bool GrafoNoDir<Element>::tieneCicloAux(NodoVertice<Element>* act,NodoVertice<Element>* padre,map<NodoVertice<Element>*,bool>& visitados){
+    visitados[act] = true;
+    bool padreSaltado = false;
+    NodoArco<Element>* arco = act->getListaAdy();
+    while(arco){
+        NodoVertice<Element>* w = arco->getDestino();
+        if(w == padre && !padreSaltado){
+            padreSaltado = true;                   
+        }
+        else if(visitados[w]){
+            return true;                            
+        }
+        else if(tieneCicloAux(w,act,visitados)){
+            return true;
+        }
+        arco = arco->getSiguiente();
+    }
+    return false;
+}
+
+template <class Element>
+void GrafoNoDir<Element>::dijkstraAux(NodoVertice<Element>* origen,NodoVertice<Element>* destino,map<NodoVertice<Element>*,float>& dist,map<NodoVertice<Element>*,NodoVertice<Element>*>& padre){
+    priority_queue<pair<float,NodoVertice<Element>*> > cola;   
+    dist[origen] = 0;
+    cola.push(make_pair(0.0f,origen));
+
+    while(!cola.empty()){
+        float d = -cola.top().first;
+        NodoVertice<Element>* act = cola.top().second;
+        cola.pop();
+
+        if(d > dist[act]){
+            continue;                               
+        }
+        if(act == destino){
+            return;                                 
+        }
+        NodoArco<Element>* arco = act->getListaAdy();
+        while(arco){
+            NodoVertice<Element>* w = arco->getDestino();
+            float nueva = d + arco->getPeso();
+            if(dist.count(w) == 0 || nueva < dist[w]){
+                dist[w] = nueva;
+                padre[w] = act;
+                cola.push(make_pair(-nueva,w));
+            }
+            arco = arco->getSiguiente();
+        }
+    }
+}
+
+template <class Element>
+void GrafoNoDir<Element>::tarjanAux(NodoVertice<Element>* v,NodoVertice<Element>* padre,int& tiempo,map<NodoVertice<Element>*,int>& disc,map<NodoVertice<Element>*,int>& low,list<Element>& puntos,list<list<Element> >& puentes){
+    tiempo++;
+    disc[v] = tiempo;
+    low[v] = tiempo;
+    int hijos = 0;
+    bool esPunto = false;
+    bool padreSaltado = false;
+
+    NodoArco<Element>* arco = v->getListaAdy();
+    while(arco){
+        NodoVertice<Element>* w = arco->getDestino();
+        if(w == padre && !padreSaltado){
+            padreSaltado = true;
+        }
+        else if(disc[w] != 0){
+            if(disc[w] < low[v]){
+                low[v] = disc[w];
+            }
+        }
+        else{
+            hijos++;
+            tarjanAux(w,v,tiempo,disc,low,puntos,puentes);
+            if(low[w] < low[v]){
+                low[v] = low[w];
+            }
+            if(low[w] > disc[v]){
+                list<Element> puente;
+                puente.push_back(v->getInfo());
+                puente.push_back(w->getInfo());
+                puentes.push_back(puente);
+            }
+            if(padre != NULL && low[w] >= disc[v]){ 
+                esPunto = true;
+            }
+        }
+        arco = arco->getSiguiente();
+    }
+    if((padre == NULL && hijos > 1) || esPunto){    
+        puntos.push_back(v->getInfo());
+    }
+}
+
+template <class Element>
+void GrafoNoDir<Element>::calcularTarjan(list<Element>& puntos,list<list<Element> >& puentes){
+    map<NodoVertice<Element>*,int> disc;
+    map<NodoVertice<Element>*,int> low;
+    int tiempo = 0;
+
+    NodoVertice<Element>* act = primero;
+    while(act){
+        if(disc[act] == 0){
+            tarjanAux(act,NULL,tiempo,disc,low,puntos,puentes);
+        }
+        act = act->getSiguiente();
     }
 }
 
@@ -450,6 +570,19 @@ list<Element> GrafoNoDir<Element>::dfs(const Element& v){
 }
 
 template <class Element>
+bool GrafoNoDir<Element>::tieneCiclo(){
+    map<NodoVertice<Element>*,bool> visitados;
+    NodoVertice<Element>* act = primero;
+    while(act){
+        if(!visitados[act] && tieneCicloAux(act,NULL,visitados)){
+            return true;
+        }
+        act = act->getSiguiente();
+    }
+    return false;
+}
+
+template <class Element>
 int GrafoNoDir<Element>::getNComponentesConexas(){
     int cont = 0;
     map<NodoVertice<Element>*,bool> visitados;
@@ -464,6 +597,63 @@ int GrafoNoDir<Element>::getNComponentesConexas(){
         act = act->getSiguiente();
     }
     return cont;
+}
+
+template <class Element>
+list<Element> GrafoNoDir<Element>::getCaminoMinimo(const Element& v,const Element& w){
+    list<Element> camino;
+    NodoVertice<Element>* ptrV = buscarVertice(v);
+    NodoVertice<Element>* ptrW = buscarVertice(w);
+    if(!ptrV || !ptrW){
+        return camino;
+    }
+    map<NodoVertice<Element>*,float> dist;
+    map<NodoVertice<Element>*,NodoVertice<Element>*> padre;
+    dijkstraAux(ptrV,ptrW,dist,padre);
+
+    if(dist.count(ptrW) == 0){
+        return camino;                              
+    }
+    NodoVertice<Element>* act = ptrW;
+    while(act != ptrV){
+        camino.push_front(act->getInfo());
+        act = padre[act];
+    }
+    camino.push_front(ptrV->getInfo());
+    return camino;
+}
+
+template <class Element>
+float GrafoNoDir<Element>::getCostoCaminoMinimo(const Element& v,const Element& w){
+    NodoVertice<Element>* ptrV = buscarVertice(v);
+    NodoVertice<Element>* ptrW = buscarVertice(w);
+    if(!ptrV || !ptrW){
+        return -1;
+    }
+    map<NodoVertice<Element>*,float> dist;
+    map<NodoVertice<Element>*,NodoVertice<Element>*> padre;
+    dijkstraAux(ptrV,ptrW,dist,padre);
+
+    if(dist.count(ptrW) == 0){
+        return -1;                                  
+    }
+    return dist[ptrW];
+}
+
+template <class Element>
+list<Element> GrafoNoDir<Element>::getPuntosArticulacion(){
+    list<Element> puntos;
+    list<list<Element> > puentes;
+    calcularTarjan(puntos,puentes);
+    return puntos;
+}
+
+template <class Element>
+list<list<Element> > GrafoNoDir<Element>::getPuentes(){
+    list<Element> puntos;
+    list<list<Element> > puentes;
+    calcularTarjan(puntos,puentes);
+    return puentes;
 }
 
 template <class Element>
