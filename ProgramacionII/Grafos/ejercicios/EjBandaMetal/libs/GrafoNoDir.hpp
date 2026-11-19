@@ -34,7 +34,7 @@ class GrafoNoDir{
                             ,map<NodoVertice<Element>*,bool>& visitados);               // O(n+m), DFS con padre
         void dijkstraAux(NodoVertice<Element>* origen,NodoVertice<Element>* destino
                         ,map<NodoVertice<Element>*,float>& dist
-                        ,map<NodoVertice<Element>*,NodoVertice<Element>*>& padre);      // O(n^2), pesos >= 0
+                        ,map<NodoVertice<Element>*,NodoVertice<Element>*>& padre);      // O((n+m) log n), pesos >= 0
         void tarjanAux(NodoVertice<Element>* v,NodoVertice<Element>* padre,int& tiempo
                       ,map<NodoVertice<Element>*,int>& disc
                       ,map<NodoVertice<Element>*,int>& low
@@ -255,35 +255,31 @@ bool GrafoNoDir<Element>::tieneCicloAux(NodoVertice<Element>* act,NodoVertice<El
 
 template <class Element>
 void GrafoNoDir<Element>::dijkstraAux(NodoVertice<Element>* origen,NodoVertice<Element>* destino,map<NodoVertice<Element>*,float>& dist,map<NodoVertice<Element>*,NodoVertice<Element>*>& padre){
-    map<NodoVertice<Element>*,bool> fijado;        
+    priority_queue<pair<float,NodoVertice<Element>*> > cola;   
     dist[origen] = 0;
+    cola.push(make_pair(0.0f,origen));
 
-    bool seguir = true;
-    while(seguir){
-        NodoVertice<Element>* act = NULL;
-        NodoVertice<Element>* cand = primero;
-        while(cand){
-            if(!fijado[cand] && dist.count(cand) == 1 && (act == NULL || dist[cand] < dist[act])){
-                act = cand;
-            }
-            cand = cand->getSiguiente();
-        }
+    while(!cola.empty()){
+        float d = -cola.top().first;
+        NodoVertice<Element>* act = cola.top().second;
+        cola.pop();
 
-        if(act == NULL || act == destino){
-            seguir = false;                        
+        if(d > dist[act]){
+            continue;                               
         }
-        else{
-            fijado[act] = true;
-            NodoArco<Element>* arco = act->getListaAdy();
-            while(arco){
-                NodoVertice<Element>* w = arco->getDestino();
-                float nueva = dist[act] + arco->getPeso();
-                if(!fijado[w] && (dist.count(w) == 0 || nueva < dist[w])){
-                    dist[w] = nueva;                
-                    padre[w] = act;
-                }
-                arco = arco->getSiguiente();
+        if(act == destino){
+            return;                                 
+        }
+        NodoArco<Element>* arco = act->getListaAdy();
+        while(arco){
+            NodoVertice<Element>* w = arco->getDestino();
+            float nueva = d + arco->getPeso();
+            if(dist.count(w) == 0 || nueva < dist[w]){
+                dist[w] = nueva;
+                padre[w] = act;
+                cola.push(make_pair(-nueva,w));
             }
+            arco = arco->getSiguiente();
         }
     }
 }
@@ -450,7 +446,7 @@ list<list<Element> > GrafoNoDir<Element>::getArcos(){
     while(act){
         NodoArco<Element> *arcoAct = act->getListaAdy();
         while(arcoAct){
-            if(arcoAct->getDestino()->getInfo() <= act->getInfo()){
+            if(arcoAct->getDestino()->getInfo() < act->getInfo()){
                 list<Element> arco;
                 arco.push_back(act->getInfo());
                 arco.push_back(arcoAct->getDestino()->getInfo());
@@ -537,12 +533,6 @@ void GrafoNoDir<Element>::modificarPesoArco(const Element& v,const Element& w,fl
     NodoArco<Element> *ptrArco = buscarArco(ptrV,ptrW);
     if(ptrArco){
         ptrArco->setPeso(p);
-        if(ptrV != ptrW){
-            NodoArco<Element> *ptrArcoRet = buscarArco(ptrW,ptrV);
-            if(ptrArcoRet){
-                ptrArcoRet->setPeso(p);
-            }
-        }
     }
     return;
 }
