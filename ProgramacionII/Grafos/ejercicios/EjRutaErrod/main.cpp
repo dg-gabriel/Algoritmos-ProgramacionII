@@ -1,3 +1,5 @@
+// Parcial: Ruta de Errod
+// Backtracking - Encontra el camino de maximo costo posible (retornar el costo no el camino)
 #include <iostream>
 #include <map>
 #include "GrafoNoDir.hpp"

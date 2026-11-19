@@ -1,3 +1,6 @@
+// Ej. Mapa Mundial
+// Encontrar el Arbol de expansion minima con no mas de k incidencias por nodo
+// Backtracking probando cada camino y volviendo si sobrepasa k
 #include <iostream>
 #include <list>
 #include <map>
