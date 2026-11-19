@@ -61,12 +61,10 @@ class GrafoDir{
         list<Element> dfs(const Element& v);                                    // O(n+m), busqueda en profundidad desde v (solo alcanzables por arcos salientes)
         int getNComponentesConexas();                                           // O(n(n+m)), recorre y retorna el numero de CCs, ignora el sentido de los arcos
         bool tieneCiclo();                                                      // O(n+m), true si el grafo tiene al menos un ciclo
-        list<Element> getCaminoMinimo(const Element& v,const Element& w);       // O((n+m) log n), camino de menor peso de v a w (Dijkstra), vacia si no hay
-        float getCostoCaminoMinimo(const Element& v,const Element& w);          // O((n+m) log n), costo del camino minimo de v a w, -1 si no hay
+        list<Element> getCaminoMinimo(const Element& v,const Element& w);       // O(n^2), camino de menor peso de v a w (Dijkstra), vacia si no hay
+        float getCostoCaminoMinimo(const Element& v,const Element& w);          // O(n^2), costo del camino minimo de v a w, -1 si no hay
         void imprimirGrafo() const;                                             // O(n+m), imprime el grafo para depurar
         void vaciar();                                                          // O(n+m)
-        // tarjan para componentes fuertemente conexas
-        // ordenamiento topologico (funciona solo en DAG)
 };
 
 //////////// Privados //////////

@@ -1,3 +1,6 @@
+// Ej. Aeropuertos
+// Backtracking - Encontrar la mayor cantidad de vertices de forma que ninguno de la lista tenga adyacencia
+// entre si
 #include <iostream>
 #include <list>
 #include <map>

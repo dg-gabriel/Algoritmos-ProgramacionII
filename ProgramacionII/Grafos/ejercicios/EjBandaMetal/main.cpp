@@ -1,3 +1,6 @@
+// Ej. Banda de Metal
+// Backtracking - Encontrar el grupo de vertices mas pequeño tal que todo el grafo este cubierto ya sea como
+// marcado (1) o vecino de un marcado (2) (conjunto dominante minimo)
 #include <iostream>
 #include "GrafoNoDir.hpp"
 
